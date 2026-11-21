@@ -85,35 +85,72 @@
 .piano-row-label b{color:var(--ink)}
 .piano-row .key.black{width:var(--black-width)}
 .piano-row .key .octave-mark{display:block;font-size:clamp(8px,1.1vw,13px)}
-body.piano-expanded{overflow:hidden;overscroll-behavior:none}
-.piano-expanded .piano-panel{
-  position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;
-  border:0;border-radius:0;
-  padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
-    max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
-}
-.piano-expanded .piano-header{flex-wrap:wrap}
-.piano-expanded .piano-rows{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overflow:auto;overscroll-behavior:contain}
-.piano-expanded .piano-row{flex:1 0 64px;display:flex;flex-direction:column;gap:3px}
-.piano-expanded .piano-row .keys{flex:1;height:auto;min-height:43px}
-.piano-expanded .piano-main .keys{border-color:var(--accent)}
-.piano-expanded .piano-row .key{font-size:clamp(9px,1.2vw,15px)}
-.piano-expanded .piano-row .key .key-letter{display:block}
-.piano-expanded #toast{z-index:22}
 @media(max-width:440px){
   .piano-header{flex-wrap:wrap}
   .piano-entry-bar .quiet{width:100%;font-size:11px}
 }
-@media(max-height:650px){
-  .piano-expanded .piano-rows{gap:5px}
-  .piano-expanded .piano-row{flex-basis:54px}
-  .piano-expanded .piano-row .keys{min-height:36px}
+
+/* Fixed key geometry shared by the score workspace and Score + Keys. */
+.piano-panel{position:relative;overflow:visible}
+.piano-rows{display:grid;gap:4px;justify-items:center}
+.piano-row{max-width:100%}
+.piano-row .keys{height:var(--piano-height);width:var(--row-width);max-width:100%}
+.piano-row .key{flex:0 0 var(--white-key);min-height:0;height:100%}
+.piano-row .key.black{width:calc(var(--white-key)*.62);height:62%}
+.piano-row-label{line-height:15px}
+.piano-row-settings{position:absolute;z-index:7;right:13px;top:42px;width:min(254px,calc(100% - 26px));display:grid;gap:9px;
+  background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;box-shadow:0 6px 30px #24184630}
+.piano-row-settings .piano-size-label{justify-content:space-between;color:var(--ink);font-weight:650}
+.piano-row-settings input{width:100%;margin:0}
+.piano-extra-rows{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+.piano-extra-rows label{font-size:11px}
+.piano-row-settings #piano-range{margin-left:0}
+.score-keys-header,.passage-controls{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:4px 8px}
+.score-keys-title{display:flex;flex:1;min-width:0;align-items:baseline;gap:10px}
+.score-keys-title b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.score-keys-title span{color:var(--muted);font-size:12px}
+.passage-controls .play{height:35px;width:37px;min-height:35px}
+.passage-actions{margin-left:auto;display:flex;gap:5px}
+.passage-controls .button{min-height:35px}
+#keys-record.is-recording{background:#b83045;color:white}
+#keys-take-status{margin:0 2px;min-width:0;overflow-wrap:anywhere}
+.key.lit.reference,.key.black.lit.reference{box-shadow:inset 0 0 0 3px #eebd58}
+.piano-preview{color:var(--paper-selected);fill:currentColor;pointer-events:none}
+.piano-preview .take-held{opacity:.67}
+.piano-preview .section-start{stroke:var(--paper-selected);stroke-width:2;fill:none}
+body.score-keys{overflow:hidden}
+.score-keys .top,.score-keys .document,.score-keys .score-tools,.score-keys .paper-header,.score-keys .paper-footer,
+.score-keys .workspace>.transport,.score-keys .piano-header .section-title,.score-keys #piano-entry,.score-keys #input-settings{display:none}
+.score-keys .layout{display:block;height:100dvh;min-height:0}
+.score-keys .workspace{height:100%;max-width:none;padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:5px}
+.score-keys .score-panel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.score-keys .paper{height:100%;display:flex;align-items:safe center;border-top:0}
+.score-keys .score-scroll{height:100%;min-height:0;display:block}
+.score-keys .score-scroll:not(.score-rows){display:flex;align-items:safe center}
+.score-keys .score-scroll #sheet{flex:none}
+.score-keys .piano-panel{flex:none;padding:3px 7px 6px}
+.score-keys .piano-header{justify-content:flex-end;margin-bottom:2px}
+.score-keys .piano-header .icon-btn{min-height:28px}
+.score-keys .piano-row-settings{top:auto;bottom:100%;right:4px;margin-bottom:2px}
+.score-keys .library,.score-keys .inspector{display:none;position:fixed;z-index:17;top:54px;bottom:0;overflow:auto;width:min(284px,86vw);padding:14px;box-shadow:0 4px 35px #1f16402d}
+.score-keys .library{left:0}
+.score-keys .inspector{right:0}
+.score-keys.keys-library-open .library,.score-keys.keys-inspector-open .inspector{display:flex}
+.score-keys.keys-inspector-open .inspector{display:block}
+@media(max-width:650px){
+  #score-keys-open span{display:none}
+  .passage-controls{flex-wrap:wrap}
+  #keys-take-status:not(:empty){flex-basis:100%}
 }
-@media(max-height:475px){
-  .piano-expanded .piano-entry-bar,.piano-expanded .piano-row-settings{margin-bottom:5px}
-  .piano-expanded .piano-row{flex-basis:48px}
-  .piano-expanded .piano-row .keys{min-height:32px}
+@media(max-height:480px){
+  .score-keys .piano-row-label{font-size:10px;line-height:12px}
 }
+@media print{
+  .score-keys-header,.passage-controls{display:none!important}
+  .score-keys .workspace,.score-keys .layout{display:block;height:auto}
+}
+#sheet .replaced-take-note{opacity:.25}
+#sheet .take-in-bar{visibility:hidden}
 </style>
 <!-- Embedded asset licenses
 Copyright © 2026, Steinberg Media Technologies GmbH (http://www.steinberg.net/),
@@ -1757,6 +1794,12 @@ THE SOFTWARE.
     <button class="help-link" id="help" data-icon="help">Controls &amp; shortcuts</button>
   </aside>
   <main class="workspace">
+    <div id="score-keys-header" class="score-keys-header" hidden>
+      <button id="keys-library" class="icon-btn" data-icon="library" aria-label="Open score library" aria-expanded="false"></button>
+      <div class="score-keys-title"><b id="keys-title"></b><span id="keys-mode"></span></div>
+      <button id="keys-inspector" class="icon-btn" data-icon="sliders" aria-label="Open inspector" aria-expanded="false"></button>
+      <button id="keys-exit" class="icon-btn" data-icon="shrink" aria-label="Exit Score and Keys"></button>
+    </div>
     <div class="document">
       <div class="document-title"><div class="crumb" id="crumb">SCORE WORKSPACE</div><h1 id="title">Twinkle, Twinkle, Little Star</h1><div id="subtitle" class="subtitle"></div></div>
       <div class="doc-actions">
@@ -1777,6 +1820,7 @@ THE SOFTWARE.
           <button id="add-bar" class="icon-btn small" data-icon="plus" title="Add measure" aria-label="Add measure"></button>
         </div>
         <div class="score-tools-right">
+          <button id="score-keys-open" class="tool" data-icon="piano" title="Keep the score and playable keyboard on screen" aria-label="Score and Keys"><span>Score + Keys</span></button>
           <button id="sheet-view" class="tool" data-icon="view" aria-label="Sheet view" title="Sheet layout and focus controls"><span>View</span></button>
           <button id="label-cycle" class="tool" data-icon="label" title="Cycle note labels">Note names</button>
           <button id="zoom-out" class="icon-btn small" data-icon="minus" aria-label="Zoom out"></button><output id="zoom-number">100%</output><button id="zoom-in" class="icon-btn small" data-icon="plus" aria-label="Zoom in"></button>
@@ -1813,6 +1857,17 @@ THE SOFTWARE.
       <div class="tempo"><label for="bpm">TEMPO</label><div><input id="bpm" type="number" min="24" max="300" value="92" aria-label="Score tempo"><span>BPM</span></div></div>
       <div class="transport-tools"><button id="metronome" class="icon-btn" data-icon="metro" aria-label="Toggle metronome" title="Metronome"></button><button id="loop" class="icon-btn" data-icon="loop" aria-label="Loop measures" title="Loop measures"></button><button id="volume-button" class="icon-btn" data-icon="volume" aria-label="Volume and metronome" title="Volume and metronome"></button></div>
     </section>
+    <section id="passage-controls" class="passage-controls" aria-label="Play and record a passage" hidden>
+      <button id="keys-play" class="play" data-icon="play" aria-label="Play"></button>
+      <button id="keys-replay" class="tool" data-icon="restart">Replay</button>
+      <button id="keys-section" class="tool" data-icon="bars"><span id="keys-section-label">Bar 1</span></button>
+      <div class="passage-actions">
+        <button id="keys-record" class="button" data-icon="record"><span id="keys-record-label">Record</span></button>
+        <button id="keys-keep" class="button primary" hidden>Keep take</button>
+        <button id="keys-discard" class="icon-btn" data-icon="close" aria-label="Discard take" title="Discard take" hidden></button>
+      </div>
+      <p id="keys-take-status" class="quiet" role="status"></p>
+    </section>
     <section id="piano-panel" class="piano-panel" aria-label="Piano keyboard">
       <div class="piano-header">
         <div class="section-title"><span data-icon="piano"></span><h2>Piano keyboard</h2><span id="piano-input" class="quiet">On screen</span></div>
@@ -1821,17 +1876,25 @@ THE SOFTWARE.
           <output id="octaves" aria-label="Main keyboard range">C4–B5</output>
           <button class="icon-btn small" id="octave-up" data-icon="right" title="Higher main octave" aria-label="Higher main octave"></button>
           <button id="input-settings" class="icon-btn small" data-icon="plug" aria-label="MIDI and microphone input" title="Connect input"></button>
-          <button id="expand-piano" class="icon-btn" data-icon="expand" aria-label="Expand keyboard" title="Expand keyboard" aria-expanded="false"></button>
+          <button id="keyboard-settings" class="icon-btn small" data-icon="sliders" aria-label="Keyboard size and octave rows" title="Keyboard size and octave rows" aria-expanded="false"></button>
+          <button id="expand-piano" class="icon-btn" data-icon="expand" aria-label="Open Score and Keys" title="Score + Keys" aria-expanded="false"></button>
         </div>
       </div>
       <div class="piano-entry-bar" id="piano-entry">
         <button class="tool" id="piano-step" data-icon="note" aria-pressed="false">Enter notes</button>
         <button class="tool" id="piano-capture" data-icon="record" aria-pressed="false"><span id="piano-capture-label">Record into score</span></button>
+        <button id="piano-take-settings" class="tool" data-icon="sliders" hidden>Take settings</button>
+        <button id="piano-keep" class="button primary" hidden>Keep take</button>
+        <button id="piano-discard" class="icon-btn" data-icon="close" aria-label="Discard take" title="Discard take" hidden></button>
         <span id="piano-entry-status" class="quiet" role="status" aria-atomic="true"></span>
       </div>
       <div id="piano-row-settings" class="piano-row-settings" hidden>
-        <label>Rows above <select id="piano-upper"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
-        <label>Rows below <select id="piano-lower"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+        <label class="piano-size-label" for="piano-size">Key size <output id="piano-size-label">36 px</output></label>
+        <input id="piano-size" type="range" min="24" max="46" step="1" value="36">
+        <div id="piano-extra-rows" class="piano-extra-rows" hidden>
+          <label>Higher rows <select id="piano-upper"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+          <label>Lower rows <select id="piano-lower"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+        </div>
         <span id="piano-range" class="quiet"></span>
       </div>
       <div id="keys" class="piano-rows" aria-label="Playable piano keys"></div>
@@ -2022,6 +2085,15 @@ function makeTake(raw,detail,bpm){
   const piano=raw.source==='piano-mic', start=piano?raw.notationStart||0:0;
   const events=piano?[...raw.events].sort((a,b)=>a.on-b.on||a.p-b.p):raw.events;
   const lastByPitch=new Map();let chordOn=-Infinity;
+  if(raw.assist){
+    const factor=bpm*PPQ/60;
+    const played=events.map(n=>({p:n.p,v:n.v,channel:n.channel,id:n.id,t:Math.max(0,n.on-start)*factor,d:Math.max(1,(n.off-n.on)*factor)}));
+    return adjustPerformance(played,raw.assist,0,PPQ,bpm).map(n=>{
+      const tick=Math.round(n.t),length=Math.max(1,Math.round(n.d));
+      return note(n.p,tick,length,n.p<60?1:0,detail==='basic'?78:n.v,{rawId:n.id,channel:n.channel??0,
+        micro:detail==='full'?n.t-tick:0,microLength:detail==='full'?n.d-length:0});
+    });
+  }
   const notes=events.map(n=>{
     if(n.on-chordOn>.038)chordOn=n.on;
     const actualT=Math.max(0,n.on-start)*bpm*PPQ/60, actualD=(n.off-n.on)*bpm*PPQ/60;
@@ -2039,6 +2111,53 @@ function makeTake(raw,detail,bpm){
     return item;
   });
   return notes.sort((a,b)=>a.t-b.t||a.p-b.p);
+}
+
+const TIMING_ASSIST=[['off','Off'],['gentle','Gentle'],['balanced','Balanced'],['strong','Strong']];
+function adjustPerformance(events,strength,origin,pulse=PPQ,bpm=92,pitchTargets=[]){
+  const sorted=events.map(e=>({...e})).sort((a,b)=>a.t-b.t||a.p-b.p);
+  if(strength==='off'||!sorted.length)return sorted;
+  const settings={gentle:{pull:.45,window:.24,chord:.035},balanced:{pull:.8,window:.38,chord:.045},
+    strong:{pull:1,window:.5,chord:.065}}[strength];
+  if(!settings)return sorted;
+  const distance=(t,grid)=>Math.abs(t-Math.round(t/grid)*grid);
+  const played=sorted.filter((n,i)=>!i||n.t-sorted[i-1].t>pulse/10);
+  const subdivisions=[4,6];
+  const grid=subdivisions.reduce((best,div)=>{
+    const step=pulse/div;
+    const error=played.reduce((sum,n)=>sum+distance(n.t-origin,step)/step,0)/played.length;
+    return error+(div===6?.055:0)<best.error?{step,error:error+(div===6?.055:0)}:best;
+  },{error:Infinity,step:pulse/4}).step;
+  const pull=(value,anchor)=>{
+    const offset=value-anchor, near=Math.round(offset/grid)*grid-offset;
+    return Math.abs(near)<=grid*settings.window?value+near*settings.pull:value;
+  };
+  const fingerWindow=settings.chord*bpm*PPQ/60;
+  const last=new Map(), usedPitches=new Set();let chordStart=-Infinity;
+  for(const n of sorted){
+    if(n.t-chordStart>fingerWindow||usedPitches.has(n.p)){chordStart=n.t;usedPitches.clear();}
+    usedPitches.add(n.p);
+    const original=n.t, duration=n.d;
+    const together=original+(chordStart-original)*settings.pull;
+    n.t=Math.max(origin,Math.round(pull(together,origin)));
+    n.d=Math.max(1,Math.round(duration>grid*.52?pull(duration,0):duration));
+    // Pitch matching is opt-in and only changes a nearby accidental with one plausible target.
+    if(strength==='strong'&&pitchTargets.length){
+      const near=pitchTargets.filter(e=>Math.abs(e.t-n.t)<=grid*.65&&Math.abs(e.p-n.p)<=1);
+      const options=new Set(near.map(e=>e.p));
+      if(options.size===1){
+        const p=options.values().next().value;
+        if(p!==n.p&&!sorted.some(other=>other!==n&&other.p===p&&Math.abs(other.t-original)<fingerWindow))n.p=p;
+      }
+    }
+    const previous=last.get(n.p);
+    if(previous){
+      if(n.t<=previous.t)n.t=Math.max(previous.t+1,Math.round(original));
+      previous.d=Math.max(1,Math.min(previous.d,n.t-previous.t));
+    }
+    last.set(n.p,n);
+  }
+  return sorted.sort((a,b)=>a.t-b.t||a.p-b.p);
 }
 
 const $=id=>document.getElementById(id);
@@ -2089,7 +2208,7 @@ function icons(root=document){root.querySelectorAll('[data-icon]').forEach(el=>{
 const STORE='notely-studio-v1';
 let stored={}; try{stored=JSON.parse(localStorage.getItem(STORE))||{};}catch{}
 let works=stored.works||{}, piece=clone(works[stored.current]||builtins[0]), modified=stored.modified||{};
-const defaults={theme:'cream',labels:'above',follow:true,zoom:100,volume:0.58,metroVolume:0.23,metro:false,octave:4,a4:440,grid:24,sheetLayout:'strip',guide:true,sheetOnly:false,focusPlayback:false,focusPractice:false,soundMuted:false,inputMuted:false,recordInput:'piano-mic',pianoDevice:'',pianoSensitivity:'balanced',pianoMute:true,pianoUpper:1,pianoLower:1};
+const defaults={theme:'cream',labels:'above',follow:true,zoom:100,volume:0.58,metroVolume:0.23,metro:false,octave:4,a4:440,grid:24,sheetLayout:'strip',guide:true,sheetOnly:false,focusPlayback:false,focusPractice:false,soundMuted:false,inputMuted:false,recordInput:'piano-mic',pianoDevice:'',pianoSensitivity:'balanced',pianoMute:true,pianoUpper:0,pianoLower:0,pianoSize:36,recordAssist:"gentle"};
 const pref={...defaults,...stored.pref};
 const practice={rate:75,hand:'both',reference:'both',retry:true,threshold:3,recovery:'previous',back:1,marker:1,delay:850,tolerance:180,report:[],...stored.practice};
 let mode='compose', selected=null, cursor=0, timeSig=[], geometry=[], undoStack=[],redoStack=[];
@@ -2121,6 +2240,7 @@ function switchScore(id){
   selected=null;clearLink();setMoveNotes(false);cursor=0;undoStack=[];redoStack=[];lastHit=null;
   loop={enabled:false,from:1,to:Math.min(2,piece.bars)};
   resetCamera();$('library').classList.remove('open');
+  if(pianoExpanded)showKeyboardDrawer('');
   storeLocal();render();updatePlayhead(false);
 }
 function newScore(title){
@@ -2225,7 +2345,7 @@ function glyphAt(n,b,x,acc,segment,start,headOffset=0,chordStem=true,beam=false)
   if(start&&n.finger)html+=textSVG(x+4,y-34,escapeHTML(n.finger),'class="mark" text-anchor="middle" font-size="10"');
   return html;
 }
-function barMarkup(b,barX,index,last,includeHits,first){
+function barMarkup(b,barX,index,last,includeHits,first,replacing){
   const x=barX, width=b.w, dx=x-b.x, xFor=t=>noteX(b,t)+dx;
   const bottom=staffY(piece.staves-1);
   let out='<g>';
@@ -2274,7 +2394,8 @@ function barMarkup(b,barX,index,last,includeHits,first){
     if(filled<b.end)rests.push(...(!list.length?[{t:b.t+b.length*.44,d:384}]:splitRest(filled,b.end,b)));
     for(const r of rests){
       const d=writtenDuration(r.d),rx=xFor(r.t);
-      out+='<g class="note">'+mus(rx,d.i===0?y-30:y-20,SM.rest[d.i],38);
+      const identity=!list.length?' data-empty-rest="'+b.i+'/'+s+'"':'';
+      out+='<g class="note"'+identity+'>'+mus(rx,d.i===0?y-30:y-20,SM.rest[d.i],38);
       for(let i=0;i<d.dots;i++)out+='<circle cx="'+(rx+15+i*4)+'" cy="'+(y-23)+'" r="1.55"/>';
       out+='</g>';
     }
@@ -2322,7 +2443,7 @@ function barMarkup(b,barX,index,last,includeHits,first){
         known.set(w.degree,w.acc);
         const tEnd=Math.min(b.end,n.t+n.d), span=tEnd-start;
         const offset=i>0&&Math.abs(w.y-spelling(stack[i-1],b).y)<=5?8:0;
-        out+='<g class="note'+(picked?' picked':'')+'">';
+        out+='<g class="note'+(picked?' picked':'')+(replacing?.has(n.id)?' replaced-take-note':'')+'">';
         if(picked)out+='<circle class="picked-back" cx="'+(nx+6+offset)+'" cy="'+w.y+'" r="13"/>';
         out+=glyphAt(n,b,nx,accidental===null?null:accidental,span,isStart,offset,stack.length===1||i===0,beams.has(n.id));
         if(i===0&&stack.length>1&&span<384){
@@ -2350,7 +2471,8 @@ function barMarkup(b,barX,index,last,includeHits,first){
   return out+'</g>';
 }
 function renderScore(){
-  timeSig=measuresOf(piece);
+  const barCount=keyboardPreviewBarCount();
+  timeSig=measuresOf(barCount>piece.bars?{...piece,bars:barCount}:piece);
   const layout=layoutSheet(buildGeometry(),$('score-scroll').clientWidth,pref.zoom/100,pref.sheetLayout);
   geometry=layout.bars;sheetRows=layout.rows;
   const svg=$('sheet');
@@ -2359,14 +2481,15 @@ function renderScore(){
   svg.setAttribute('height',Math.ceil(layout.height*layout.scale));
   const brace=piece.staves===2?mus(14,MAIN_LINE-40,0xE000,161,'fill="var(--paper-ink)" transform="translate(14 0) scale(.45 1) translate(-14 0)"'):'';
   let markup='<rect class="current-bar" id="current-bar" y="12" height="'+(staffY(piece.staves-1)+24)+'" rx="3"/>';
+  const replacing=previousKeyboardNotes();
   for(const row of sheetRows){
-    const bars=row.bars.map((b,i)=>barMarkup(b,b.x+20,b.i,b.i===geometry.length-1,true,row.i>0&&i===0)).join('');
+    const bars=row.bars.map((b,i)=>barMarkup(b,b.x+20,b.i,b.i===geometry.length-1,true,row.i>0&&i===0,replacing)).join('');
     markup+='<g transform="translate(0 '+row.y+')">'+brace+bars+'</g>';
   }
-  markup+='<g id="play-caret"><path class="hint-shape" d="M -4 19 H 4 L 0 25 Z"/>'+lineSVG(0,24,0,staffY(piece.staves-1)+13,'guide')+'</g><g id="drag-preview"></g>';
+  markup+='<g id="piano-preview" class="piano-preview"></g><g id="play-caret"><path class="hint-shape" d="M -4 19 H 4 L 0 25 Z"/>'+lineSVG(0,24,0,staffY(piece.staves-1)+13,'guide')+'</g><g id="drag-preview"></g>';
   svg.innerHTML=markup;
   sheetScale=layout.scale;sheetViewportWidth=$('score-scroll').clientWidth;
-  updatePlayhead(false);
+  drawKeyboardPreview();updatePlayhead(false);
 }
 
 function pointOnSheet(event){
@@ -2479,7 +2602,7 @@ function attachSheet(){
   const svg=$('sheet');
   svg.addEventListener('contextmenu',e=>{const id=e.target.dataset.note;if(id&&mode==='compose'&&!pref.sheetOnly){e.preventDefault();selectNote(id);openRadial(focusedNote(),e);}});
   svg.addEventListener('pointerdown',e=>{
-    if(e.button!==0||drag||mode!=='compose'||pref.sheetOnly)return;
+    if(e.button!==0||drag||mode!=='compose'||pref.sheetOnly||pianoExpanded)return;
     finishComposerTake();clearStepEntry();closeRadial();
     const id=e.target.dataset.note;
     if(!id&&moveNotes){
@@ -2551,6 +2674,10 @@ function attachSheet(){
   }
   svg.addEventListener('pointerup',e=>finish(e,false));svg.addEventListener('pointercancel',e=>finish(e,true));
   svg.addEventListener('click',e=>{
+    if(pianoExpanded){
+      if(!composerTake)setKeyboardPassage(pointOnSheet(e).b.i,null);
+      return;
+    }
     if(mode==='compose'&&!pref.sheetOnly)return;
     const id=e.target.dataset.note,q=pointOnSheet(e),t=id?piece.notes.find(n=>n.id===id)?.t:q.t;
     if(t===undefined)return;
@@ -2713,7 +2840,12 @@ function liveOff(token){
   composerKeyOff(token);
 }
 function prepareEvents(from){
-  const end=limitTick(), byId=new Map(piece.notes.map(n=>[n.id,n]));
+  const end=limitTick();
+  const previews=sectionPlayback?.notes||[];
+  const original=sectionPlayback?.excluded?piece.notes.filter(n=>!sectionPlayback.excluded.has(n.id)):piece.notes;
+  const filled=previews.length?new Set(original.map(n=>n.t+'/'+n.p+'/'+n.s)):null;
+  const all=previews.length?original.concat(previews.filter(n=>!filled.has(n.t+'/'+n.p+'/'+n.s))):original;
+  const byId=new Map(all.map(n=>[n.id,n]));
   const continuations=new Set(piece.notes.filter(n=>n.tie&&byId.get(n.tie)?.p===n.p&&Math.abs(byId.get(n.tie).t-n.t-n.d)<=1).map(n=>n.tie));
   const durationOf=n=>{
     let endTick=n.t+n.d, tail=n;
@@ -2728,7 +2860,7 @@ function prepareEvents(from){
     if(n.art==='fermata'&&tail===n)endTick=n.t+n.d*1.4;
     return endTick;
   };
-  const pedal=piece.pedal||[],notes=piece.notes.filter(n=>n.t+n.d>from&&n.t<end&&n.s<piece.staves).sort((a,b)=>a.t-b.t||a.p-b.p);
+  const pedal=piece.pedal||[],notes=all.filter(n=>n.t+n.d>from&&n.t<end&&n.s<piece.staves).sort((a,b)=>a.t-b.t||a.p-b.p);
   queue=notes.filter(n=>!continuations.has(n.id)||n.t===from).map(n=>{
     const micro=piece.feel?(n.micro||0):0,t=Math.max(from,n.t+micro);
     let released=durationOf(n)+(piece.feel?(n.microLength||0)+micro:0);
@@ -2746,13 +2878,13 @@ function prepareEvents(from){
   expected=notes.filter(n=>n.t>=from&&!continuations.has(n.id)&&(practice.hand==='both'||piece.staves===1||n.s===(practice.hand==='right'?0:1))).map(n=>({p:n.p,t:n.t,time:timeAt(timeSig,n.t),status:''}));
 }
 const speed=()=>mode==='practice'?practice.rate/100:1;
-const limitTick=()=>loop.enabled?timeSig[clamp(loop.to-1,0,timeSig.length-1)].end:timeSig.at(-1).end;
+const limitTick=()=>sectionPlayback?.end??(loop.enabled?timeSig[clamp(loop.to-1,0,timeSig.length-1)].end:timeSig.at(-1).end);
 const startLoop=()=>timeSig[clamp(loop.from-1,0,timeSig.length-1)].t;
 function startPlayback(recovering=false){
   finishComposerTake();clearStepEntry();
   clearTimeout(recoveryTimer);recoveryTimer=0;
   if(playing)return;
-  if(cursor>=limitTick()||loop.enabled&&cursor<startLoop()){seekPlayback(loop.enabled?startLoop():0,0,true,recovering);return;}
+  if(!sectionPlayback&&(cursor>=limitTick()||loop.enabled&&cursor<startLoop())){seekPlayback(loop.enabled?startLoop():0,0,true,recovering);return;}
   if(mode==='practice'&&!recovering)practiceRun={id:nextId(),when:new Date().toISOString(),piece:piece.title,hit:0,miss:0,extra:0,retries:0,errors:0,start:measure().i+1};
   stopStandaloneClick();audioReady();
   baseTick=cursor;playStart=audio.currentTime+.085;originSeconds=timeAt(timeSig,baseTick);
@@ -2810,7 +2942,7 @@ function tickPlayer(){
   }
   const tail=mode==='practice'&&practiceRun&&!pref.inputMuted?practice.tolerance/1000*speed():0;
   if(seconds>=timeAt(timeSig,end)+tail){
-    if(loop.enabled){seekPlayback(startLoop(),0,true,true);return;}
+    if(loop.enabled&&!sectionPlayback){seekPlayback(startLoop(),0,true,true);return;}
     stopPlayback(false);updatePlayhead(false);return;
   }
   frame=requestAnimationFrame(tickPlayer);
@@ -2828,7 +2960,8 @@ function checkLive(p){
 }
 function practiceRestartTick(t,automatic){
   const here=measureAt(timeSig,t).i, last=timeSig.length-1;
-  const min=loop.enabled?clamp(loop.from-1,0,last):0,max=loop.enabled?clamp(loop.to-1,min,last):last;
+  const min=sectionPlayback?measureAt(timeSig,sectionPlayback.start).i:loop.enabled?clamp(loop.from-1,0,last):0;
+  const max=sectionPlayback?measureAt(timeSig,sectionPlayback.end-1).i:loop.enabled?clamp(loop.to-1,min,last):last;
   const marked=timeSig.slice(min,here).findLast(b=>b.change.recovery);
   const index=practice.recovery==='marker'?practice.marker-1:marked?.i??here-practice.back;
   const upper=automatic?Math.min(here,max):max;
@@ -2853,6 +2986,7 @@ function restartPractice(){
   seekPlayback(practiceRestartTick(cursor,false),0,true,!!practiceRun);
 }
 function stopPlayback(home=false,keepPractice=false){
+  if(!keepPractice)sectionPlayback=null;
   clearInterval(playTimer);cancelAnimationFrame(frame);clearTimeout(recoveryTimer);recoveryTimer=0;cancelCamera();
   if(playing){
     for(const voice of [...activeSound])if(voice.tag==='reference')voice.release();
@@ -2873,7 +3007,7 @@ function stopPlayback(home=false,keepPractice=false){
 }
 function playerStatus(){
   const active=playing||!!recoveryTimer;
-  for(const id of ['play','focus-play']){
+  for(const id of ['play','focus-play','keys-play']){
     const p=$(id);
     if(p.getAttribute('aria-label')===(active?'Pause':'Play')&&p.querySelector('.ico'))continue;
     p.dataset.icon=active?'pause':'play';p.innerHTML=icon(p.dataset.icon);
@@ -2889,7 +3023,7 @@ function updatePlayhead(follow){
   const beat=clamp(Math.floor((cursor-b.t)/(4*PPQ/b.meter.unit))+1,1,b.meter.beats);
   const position=(b.i+1)+'.'+beat;
   if($('position').textContent!==position){$('position').textContent=position;$('focus-position').textContent=position;}
-  $('seek').value=String(cursor);
+  $('seek').max=timeSig.at(-1).end;$('seek').value=String(cursor);
   const readout='Measure '+(b.i+1)+' / '+piece.bars;
   if($('measure-readout').textContent!==readout)$('measure-readout').textContent=readout;
   if(follow)followCamera(target);
@@ -2898,7 +3032,7 @@ const recordElapsed=()=>Math.max(0,(performance.now()-recording.start)/1000);
 function startRecording(){
   if(recordingActive())return;
   audioReady();
-  recording={start:performance.now(),bpm:piece.bpm,events:[],pedal:[],held:new Map(),annotation:''};
+  recording={start:performance.now(),bpm:piece.bpm,assist:pref.recordAssist,events:[],pedal:[],held:new Map(),annotation:''};
   for(const channel of pedalHeld)recording.pedal.push({on:0,value:127,channel});
   renderInspector();
   recordTimer=setInterval(()=>{const el=$('record-time');if(el)el.textContent=formatTime(recordElapsed());},100);
@@ -2907,7 +3041,7 @@ function finishRecording(){
   if(!recording)return;
   clearInterval(recordTimer);recordTimer=0;
   const elapsed=recordElapsed(), take=recording;recording=null;
-  const raw={version:1,bpm:take.bpm,duration:elapsed,events:take.events.map(n=>({...n,off:n.off??elapsed})),pedal:take.pedal};
+  const raw={version:1,bpm:take.bpm,assist:take.assist,duration:elapsed,events:take.events.map(n=>({...n,off:n.off??elapsed})),pedal:take.pedal};
   if(!raw.events.length){if(mode==='record')renderInspector();toast('No notes were captured.');return;}
   saveRecordedScore(raw,localRecordDetail,true,'Piano take');
   toast('Piano take saved. The original note data is preserved.');
@@ -3029,89 +3163,124 @@ function micTick(now){
 
 const keyShortcuts='awsedftgyhujkolp;'.split('');
 const PIANO_FIRST=21, PIANO_LAST=108;
-let pianoExpanded=false,pianoWidth=0,stepEntry=false,stepChord=null,composerTake=null;
+let pianoExpanded=false,pianoWidth=0,pianoRenderedStaves=0,stepEntry=false,stepChord=null,composerTake=null;
 
-function pianoRanges(octave, span, upper, lower){
-  const first=(octave+1)*12, next=first+span*12;
-  const rows=[];
+const WHITE_KEYS=Array.from({length:PIANO_LAST-PIANO_FIRST+1},(_,i)=>PIANO_FIRST+i).filter(p=>PC.includes(p%12));
+
+function pianoRanges(octave,capacity,upper,lower){
+  const anchor=WHITE_KEYS.findIndex(p=>p>=(octave+1)*12);
+  const start=clamp(anchor-Math.max(0,Math.floor((capacity-14)/2)),0,Math.max(0,WHITE_KEYS.length-capacity));
+  const end=Math.min(WHITE_KEYS.length,start+capacity);
+  const ranges=[];
+  const row=(a,b,role)=>({min:WHITE_KEYS[a],max:WHITE_KEYS[b]===undefined?PIANO_LAST:WHITE_KEYS[b]-1,count:b-a,role});
   for(let i=upper;i>0;i--){
-    const min=next+(i-1)*span*12;
-    if(min<=PIANO_LAST)rows.push({min,max:Math.min(min+span*12-1,PIANO_LAST),role:'Higher'});
+    const boundary=end+(i-1)*capacity;
+    if(boundary<WHITE_KEYS.length)ranges.push(row(boundary,Math.min(WHITE_KEYS.length,boundary+capacity),'Higher'));
   }
-  rows.push({min:Math.max(PIANO_FIRST,first),max:Math.min(next-1,PIANO_LAST),role:'Main'});
+  ranges.push(row(start,end,'Main'));
   for(let i=1;i<=lower;i++){
-    const max=first-(i-1)*span*12-1;
-    if(max>=PIANO_FIRST)rows.push({min:Math.max(PIANO_FIRST,max-span*12+1),max,role:'Lower'});
+    const boundary=start-(i-1)*capacity;
+    if(boundary>0)ranges.push(row(Math.max(0,boundary-capacity),boundary,'Lower'));
   }
-  // Put C8 on the preceding octave when there is room in that row.
-  if(rows[0].min===PIANO_LAST&&rows.length>1){
-    rows.shift();rows[0].max=PIANO_LAST;
-  }else if(rows[0].max===PIANO_LAST-1&&(upper||rows[0].role==='Main'&&pianoExpanded)){
-    rows[0].max=PIANO_LAST;
-  }
-  return rows;
+  return ranges;
 }
 function renderPiano(){
-  const board=$('keys');
-  const width=board.clientWidth||pianoWidth||560;
-  pianoWidth=width;
-  const span=pianoExpanded?clamp(Math.floor(width/265),1,3):2;
-  const rows=pianoRanges(pref.octave,span,pianoExpanded?pref.pianoUpper:0,pianoExpanded?pref.pianoLower:0);
+  const board=$('keys'), width=board.clientWidth||pianoWidth||560;
+  pianoWidth=width;pianoRenderedStaves=piece.staves;
+  const keySize=clamp(Number(pref.pianoSize)||36,24,46);
+  const height=Math.round(keySize*2.65);
+  const capacity=clamp(Math.floor((width-2)/keySize),2,WHITE_KEYS.length);
+  const heightBudget=window.innerHeight||800;
+  const scoreMin=piece.staves===2?270:155;
+  const maxRows=clamp(Math.floor((heightBudget-scoreMin-133)/(height+19)),1,7);
+  let upper=pianoExpanded?clamp(Number(pref.pianoUpper)||0,0,3):0;
+  let lower=pianoExpanded?clamp(Number(pref.pianoLower)||0,0,3):0;
+  let rows=pianoRanges(pref.octave,capacity,upper,lower);
+  while(rows.length>maxRows){
+    if(rows.filter(row=>row.role==='Higher').length>=rows.filter(row=>row.role==='Lower').length&&upper>0)upper--;
+    else if(lower>0)lower--;
+    rows=pianoRanges(pref.octave,capacity,upper,lower);
+  }
   const shortcutBase=(pref.octave+1)*12;
-  board.innerHTML=rows.map(({min,max,role})=>{
-    const total=Array.from({length:max-min+1},(_,i)=>min+i).filter(p=>PC.includes(p%12)).length;
+  const rowsStyle='--white-key:'+keySize+'px;--piano-height:'+height+'px';
+  board.setAttribute('style',rowsStyle);
+  board.innerHTML=rows.map(({min,max,count,role})=>{
     const whites=[];let black='';
     for(let p=min;p<=max;p++){
       const name=pitchName(p),shortcut=keyShortcuts[p-shortcutBase]||'';
-      const keyboardLabel=shortcut?name+' · '+shortcut.toUpperCase():name;
-      const attrs=' type="button" data-pitch="'+p+'" aria-label="'+name+'" title="'+keyboardLabel+'"';
+      const attrs=' type="button" data-pitch="'+p+'" aria-label="'+name+'" title="'+name+(shortcut?' · '+shortcut.toUpperCase():'')+'"';
       const isNatural=PC.includes(p%12);
       const label=p%12===0||p===min||p===max?name:pianoExpanded&&isNatural?pitchName(p,false,false):shortcut.toUpperCase();
       const face='<span class="'+(p%12===0||p===min||p===max?'octave-mark':'key-letter')+'">'+escapeHTML(label)+'</span>';
       if(isNatural)whites.push('<button class="key"'+attrs+'>'+face+'</button>');
-      else black+='<button class="key black"'+attrs+' style="left:'+(whites.length/total*100)+'%"></button>';
+      else black+='<button class="key black"'+attrs+' style="left:'+Math.min(whites.length*keySize,(count-.33)*keySize)+'px"></button>';
     }
     const range=pitchName(min)+'–'+pitchName(max);
     const className=role==='Main'?' piano-main':'';
     return '<div class="piano-row'+className+'" role="group" aria-label="'+role+' keys '+range+'">'+
-      (pianoExpanded?'<div class="piano-row-label"><b>'+role+'</b> <span>'+range+'</span></div>':'')+
-      '<div class="keys" style="--black-width:'+(62/total)+'%">'+whites.join('')+black+'</div></div>';
+      (pianoExpanded&&rows.length>1?'<div class="piano-row-label"><b>'+role+'</b> <span>'+range+'</span></div>':'')+
+      '<div class="keys" style="--row-width:'+(count*keySize+2)+'px">'+whites.join('')+black+'</div></div>';
   }).join('');
   const main=rows.find(row=>row.role==='Main');
   $('octaves').textContent=pitchName(main.min)+'–'+pitchName(main.max);
-  $('piano-range').textContent=pitchName(rows.at(-1).min)+'–'+pitchName(rows[0].max);
+  $('piano-size-label').textContent=keySize+' px';
+  $('piano-range').textContent=rows.reduce((n,row)=>n+row.max-row.min+1,0)+' keys · '+pitchName(rows.at(-1).min)+'–'+pitchName(rows[0].max);
   $('octave-down').disabled=pref.octave<=0;$('octave-up').disabled=pref.octave>=6;
   for(const p of new Set([...liveKeys.keys(),...referenceKeys.keys()]))updateKey(p);
 }
+function toggleKeySettings(force){
+  const panel=$('piano-row-settings'), open=force??panel.hidden;
+  panel.hidden=!open;$('keyboard-settings').setAttribute('aria-expanded',String(open));
+}
+function showKeyboardDrawer(name){
+  document.body.classList.toggle('keys-library-open',name==='library');
+  document.body.classList.toggle('keys-inspector-open',name==='inspector');
+  $('keys-library').setAttribute('aria-expanded',String(name==='library'));
+  $('keys-inspector').setAttribute('aria-expanded',String(name==='inspector'));
+}
 function setPianoExpanded(expanded){
+  if(expanded&&pref.sheetOnly){pref.sheetOnly=false;storeLocal();}
   pianoExpanded=expanded;
-  document.body.classList.toggle('piano-expanded',expanded);
-  const panel=$('piano-panel'),toggle=$('expand-piano');
-  panel.setAttribute('role',expanded?'dialog':'region');
-  panel.setAttribute('aria-modal',String(expanded));
-  toggle.setAttribute('aria-expanded',String(expanded));
-  toggle.setAttribute('aria-label',expanded?'Collapse keyboard':'Expand keyboard');
-  toggle.title=expanded?'Collapse keyboard (Esc)':'Expand keyboard';
-  toggle.innerHTML=icon(expanded?'shrink':'expand');
-  $('piano-row-settings').hidden=!expanded;
-  document.querySelectorAll('.top,.library,.inspector,.document,.score-panel,.transport').forEach(el=>el.inert=expanded);
-  renderPiano();
-  if(!expanded)updatePlayhead(pref.follow);
-  toggle.focus({preventScroll:true});
+  document.body.classList.toggle('score-keys',expanded);
+  $('score-keys-header').hidden=!expanded;$('passage-controls').hidden=!expanded;
+  $('piano-extra-rows').hidden=!expanded;
+  $('expand-piano').setAttribute('aria-expanded',String(expanded));
+  $('expand-piano').setAttribute('aria-label',expanded?'Exit Score and Keys':'Open Score and Keys');
+  $('expand-piano').title=expanded?'Exit Score + Keys (Esc)':'Score + Keys';
+  $('expand-piano').innerHTML=icon(expanded?'shrink':'expand');
+  toggleKeySettings(false);showKeyboardDrawer('');
+  applyView();renderPiano();renderScore();updatePlayhead(pref.follow);
+  $(expanded?'keys-play':'expand-piano').focus({preventScroll:true});
 }
 function syncComposerPiano(){
-  const compose=mode==='compose';
+  const compose=mode==='compose', review=keyboardDrafts.get(piece.id);
+  $('keys-mode').textContent={compose:'Compose',practice:'Practice',record:'Record'}[mode];
   $('piano-entry').hidden=!compose;
-  const step=$('piano-step'),capture=$('piano-capture');
-  step.classList.toggle('on',stepEntry);capture.classList.toggle('is-recording',!!composerTake);
-  step.setAttribute('aria-pressed',String(stepEntry));capture.setAttribute('aria-pressed',String(!!composerTake));
-  step.disabled=!!composerTake;
-  $('piano-capture-label').textContent=composerTake?'Stop and add notes':'Record into score';
-  const count=composerTake?.notes.length;
-  const hint=$('piano-entry-status');
-  hint.textContent=composerTake?(count?count+' recorded':'Play the keys to begin'):
-    stepEntry?'Release the keys to place the note or chord.':'';
+  const step=$('piano-step');
+  step.classList.toggle('on',stepEntry);step.setAttribute('aria-pressed',String(stepEntry));step.disabled=!!composerTake;
+  const passage=currentKeyboardPassage(), saved=acceptedKeyboardTake(passage.from), first=passage.from+1;
+  const last=(passage.to??review?.endBar??saved?.endBar??passage.from)+1;
+  $('keys-section-label').textContent=first===last?'Bar '+first:'Bars '+first+'–'+last;
+  const active=!!composerTake, count=composerTake?.notes.length;
+  const restart=review||pianoExpanded&&saved?'Re-record':undefined;
+  $('keys-record').hidden=mode==='practice';
+  for(const [id,label,name] of [['piano-capture','piano-capture-label','Record into score'],['keys-record','keys-record-label','Record']]){
+    $(id).classList.toggle('is-recording',active||id==='keys-record'&&!!recording);
+    $(id).setAttribute('aria-pressed',String(active));
+    $(label).textContent=active?(composerTake.countIn?'Cancel count-in':'Stop'):(id==='keys-record'&&mode==='record'?focusRecordLabel():restart||name);
+  }
+  const showReview=compose&&!active&&!!review;
+  for(const id of ['keys-keep','keys-discard','piano-keep','piano-discard','piano-take-settings'])$(id).hidden=!showReview;
+  $('keys-replay').disabled=active;
+  $('keys-section').disabled=active;
+  const status=active?(composerTake.countIn?'Count-in':count?count+' notes':'Play the keys to begin'):
+    showReview?'Take ready · '+timingAssistLabel(review.assist):
+    pianoExpanded&&mode==='record'&&pianoTake?'Piano mic · '+(pianoTake.stage||focusRecordLabel()):'';
+  $('keys-take-status').textContent=status;
+  $('piano-entry-status').textContent=status||(stepEntry?'Release the keys to place the note or chord.':'');
 }
+const timingAssistLabel=value=>TIMING_ASSIST.find(([v])=>v===value)?.[1]||'Off';
+const focusRecordLabel=()=>$('focus-record-label').textContent;
 function clearStepEntry(){stepChord=null;}
 function toggleStepEntry(){
   if(mode!=='compose'||composerTake)return;
@@ -3126,16 +3295,37 @@ function startComposerTake(){
   if(pref.inputMuted){toast('Turn note input on before recording.');return;}
   if(recordingActive()){toast('Finish the open take before recording into the score.');return;}
   stopPlayback(false);stepEntry=false;clearStepEntry();
-  composerTake={origin:piece.id,tick:Math.round(cursor),timeline:timeSig,first:null,notes:[],held:new Map()};
-  syncComposerPiano();
+  const previous=keyboardDrafts.get(piece.id), passage=currentKeyboardPassage();
+  const saved=!previous&&pianoExpanded?acceptedKeyboardTake(passage.from):null;
+  const bar=previous?timeSig[previous.startBar]:timeSig[passage.from];
+  const start=pianoExpanded||previous?bar.t:Math.round(cursor);
+  const endBar=previous?previous.chosenEnd:saved?.chosenEnd??passage.to, end=endBar===null?null:timeSig[endBar]?.end??null;
+  const take={origin:piece.id,tick:start,timeline:timeSig,first:null,notes:[],held:new Map(),end,endBar,
+    pulse:keyboardPulse(bar),bpm:bar.bpm,assist:previous?.assist??saved?.assist??pref.recordAssist,match:previous?.match??saved?.match??passage.match,
+    previous,replaces:previous?.replaces??saved?.id,countNodes:[],timer:0,frame:0,lastDraw:-Infinity};
+  composerTake=take;setCursor(start,pref.follow);
+  if((previous||saved)&&pianoExpanded){
+    const ctx=audioReady(), interval=60*take.pulse/(PPQ*take.bpm), at=ctx.currentTime+.045;
+    const beats=Math.max(1,Math.round(meterLength(bar.meter)/take.pulse));
+    take.countIn=true;
+    for(let i=0;i<beats;i++)take.countNodes.push(clickTrack(at+i*interval,i===0));
+    take.timer=setTimeout(()=>{
+      if(composerTake!==take)return;
+      take.countIn=false;take.first=performance.now();take.countNodes=[];syncComposerPiano();animateKeyboardTake(take);
+    },(interval*beats+.045)*1000);
+  }
+  syncComposerPiano();if(saved)renderScore();else drawKeyboardPreview();
 }
 function composerKeyOn(p,v,token){
   if(mode!=='compose')return;
   if(composerTake){
-    const now=performance.now();
-    composerTake.first??=now;
-    const event={p,v,at:now,off:null};
-    composerTake.notes.push(event);composerTake.held.set(token,event);syncComposerPiano();
+    const take=composerTake;
+    if(take.countIn)return;
+    const now=performance.now();take.first??=now;
+    const event={p,v,t:Math.round(keyboardTakeTick(take,now)),off:null};
+    take.notes.push(event);take.held.set(token,event);
+    syncComposerPiano();drawKeyboardPreview(now);
+    if(!take.frame)animateKeyboardTake(take);
     return;
   }
   if(!stepEntry||playing||recoveryTimer)return;
@@ -3146,7 +3336,11 @@ function composerKeyOn(p,v,token){
 function composerKeyOff(token){
   if(composerTake){
     const event=composerTake.held.get(token);
-    if(event){event.off=performance.now();composerTake.held.delete(token);}
+    if(event){
+      const now=performance.now();
+      event.off=Math.round(keyboardTakeTick(composerTake,now));
+      composerTake.held.delete(token);drawKeyboardPreview(now);
+    }
   }
   if(!stepChord?.held.delete(token)||stepChord.held.size)return;
   const chord=stepChord;stepChord=null;
@@ -3154,25 +3348,60 @@ function composerKeyOff(token){
     placePianoNotes([...chord.notes.values()].map(n=>({...n,t:chord.tick,d:chord.duration})),chord.tick+chord.duration);
   }
 }
+function keyboardTakeTick(take,at){
+  const origin=timeAt(take.timeline,take.tick);
+  return Math.max(take.tick,tickAt(take.timeline,origin+Math.max(0,at-take.first)/1000));
+}
+function keyboardTakeEvents(take,now){
+  if(take.first===null)return [];
+  const end=take.end??Infinity, current=Math.round(keyboardTakeTick(take,now));
+  return take.notes.filter(n=>n.t<end).map(n=>({p:n.p,v:n.v,t:n.t,
+    d:Math.max(1,Math.min(n.off??current,end)-n.t),held:n.off===null}));
+}
+function animateKeyboardTake(take){
+  take.frame=requestAnimationFrame(now=>{
+    take.frame=0;
+    if(composerTake!==take)return;
+    const t=keyboardTakeTick(take,now);
+    if(t>=(take.end??Infinity)||t>=scoreTickCapacity()||take.notes.length>=30000){finishComposerTake();return;}
+    if(pianoExpanded){
+      extendKeyboardPreview(t+1);
+      setCursor(t,pref.follow);
+    }
+    if(now-take.lastDraw>=95&&take.held.size){
+      take.lastDraw=now;drawKeyboardPreview(now);
+    }
+    animateKeyboardTake(take);
+  });
+}
 function finishComposerTake(){
   const take=composerTake;
   if(!take)return;
-  composerTake=null;syncComposerPiano();
-  if(!take.notes.length){toast('No keyboard notes were recorded.');return;}
+  composerTake=null;clearTimeout(take.timer);cancelAnimationFrame(take.frame);
+  take.countNodes.forEach(n=>n.release());
   if(take.origin!==piece.id)return;
-  const end=performance.now(), startTime=timeAt(take.timeline,take.tick);
-  const tick=at=>Math.round(tickAt(take.timeline,startTime+(at-take.first)/1000));
-  const notes=take.notes.map(n=>{
-    const t=Math.max(take.tick,tick(n.at));
-    return {p:n.p,v:n.v,t,d:Math.max(1,tick(n.off??end)-t)};
-  });
-  const endTick=notes.reduce((last,n)=>Math.max(last,n.t+n.d),take.tick);
-  const count=placePianoNotes(notes,endTick);
-  if(count)toast(count+' '+(count===1?'note added':'notes added')+' to the score.');
+  const raw=keyboardTakeEvents(take,performance.now()).map(({held,...n})=>n);
+  if(!raw.length){
+    syncComposerPiano();renderScore();
+    if(!take.countIn)toast('No keyboard notes were recorded.');
+    return;
+  }
+  const end=Math.min(take.end??Infinity,scoreTickCapacity()), limited=raw.filter(n=>n.t<end);
+  const startBar=measureAt(timeSig,take.tick).i;
+  if(!limited.length){syncComposerPiano();renderScore();return;}
+  const draft={start:take.tick,startBar,endBar:startBar,chosenEnd:take.endBar,end,raw:limited,assist:take.assist,
+    bpm:take.bpm,pulse:take.pulse,match:take.match,replaces:take.replaces,previous:take.previous?{...take.previous,previous:null}:null};
+  keyboardDrafts.set(piece.id,draft);
+  keyboardPassages.set(piece.id,{from:startBar,to:take.endBar,match:take.match});
+  rebuildKeyboardDraft(draft);
+  syncComposerPiano();
+  setCursor(draft.start,false);
+  if(pianoExpanded&&pref.follow)glideToCursor();
 }
-function placePianoNotes(events,end){
-  const last=timeSig.at(-1),limit=last.end+(512-piece.bars)*meterLength(last.meter);
-  const occupied=new Set(piece.notes.map(n=>n.t+'/'+n.p+'/'+n.s));
+function placePianoNotes(events,end,savedTake,replaced){
+  const limit=scoreTickCapacity();
+  const replaceIds=new Set(replaced?.noteIds||[]);
+  const occupied=new Set(piece.notes.filter(n=>!replaceIds.has(n.id)).map(n=>n.t+'/'+n.p+'/'+n.s));
   const additions=[];
   for(const event of events){
     if(event.t>=limit)continue;
@@ -3187,9 +3416,18 @@ function placePianoNotes(events,end){
   }
   const target=Math.min(end,limit);
   if(additions.length){
-    touch(()=>{for(const n of additions)piece.notes.push(n);selected=null;clearLink();cursor=target;});
+    touch(()=>{
+      if(replaceIds.size)piece.notes=piece.notes.filter(n=>!replaceIds.has(n.id));
+      for(const n of additions)piece.notes.push(n);
+      if(savedTake){
+        savedTake.noteIds=additions.map(n=>n.id);
+        const history=(piece.keyboardTakes||[]).filter(t=>t.id!==replaced?.id);
+        piece.keyboardTakes=[...history,savedTake];
+      }
+      selected=null;clearLink();cursor=target;
+    });
   }else setCursor(target,false);
-  setCursor(cursor,!pianoExpanded&&pref.follow);
+  setCursor(cursor,pref.follow);
   return additions.length;
 }
 function attachPiano(){
@@ -3229,16 +3467,197 @@ function attachPiano(){
   $('piano-step').onclick=toggleStepEntry;
   $('piano-capture').onclick=()=>composerTake?finishComposerTake():startComposerTake();
   $('expand-piano').onclick=()=>setPianoExpanded(!pianoExpanded);
+  $('score-keys-open').onclick=()=>setPianoExpanded(true);
+  $('keys-exit').onclick=()=>setPianoExpanded(false);
+  $('keyboard-settings').onclick=()=>toggleKeySettings();
+  $('piano-size').value=pref.pianoSize;
+  $('piano-size').oninput=e=>{pref.pianoSize=Number(e.target.value);renderPiano();};
+  $('piano-size').onchange=storeLocal;
+  for(const name of ['library','inspector']){
+    $('keys-'+name).onclick=()=>showKeyboardDrawer(document.body.classList.contains('keys-'+name+'-open')?'':name);
+  }
+  document.addEventListener('pointerdown',e=>{
+    if(!e.target.closest?.('#piano-row-settings,#keyboard-settings')&&!$('piano-row-settings').hidden)toggleKeySettings(false);
+    if(pianoExpanded&&!e.target.closest?.('.library,.inspector,.score-keys-header'))showKeyboardDrawer('');
+  });
+  attachKeyboardPassage();
+  window.addEventListener('resize',renderPiano);
   for(const [id,property] of [['piano-upper','pianoUpper'],['piano-lower','pianoLower']]){
     const choice=$(id);choice.value=pref[property];
     choice.onchange=()=>{pref[property]=Number(choice.value);storeLocal();renderPiano();};
   }
   if(typeof ResizeObserver==='function'){
     const observer=new ResizeObserver(()=>{
-      if(pianoExpanded&&keys.clientWidth>0&&keys.clientWidth!==pianoWidth)renderPiano();
+      if(keys.clientWidth>0&&keys.clientWidth!==pianoWidth)renderPiano();
     });
     observer.observe(keys);
   }
+}
+
+const keyboardDrafts=new Map(), keyboardPassages=new Map();
+let sectionPlayback=null;
+function acceptedKeyboardTake(bar){
+  return piece.keyboardTakes?.findLast(t=>t.startBar===bar&&(t.noteIds||[]).some(id=>piece.notes.some(n=>n.id===id)));
+}
+
+function keyboardPulse(bar){
+  return bar.meter.unit===8&&bar.meter.beats%3===0?PPQ*1.5:PPQ*4/bar.meter.unit;
+}
+function currentKeyboardPassage(){
+  const mark=keyboardPassages.get(piece.id);
+  const barCount=timeSig.length||piece.bars;
+  const from=clamp(mark?.from??(timeSig.length?measureAt(timeSig,cursor).i:0),0,barCount-1);
+  return {from,to:mark?.to==null?null:clamp(mark.to,from,barCount-1),match:!!mark?.match};
+}
+function setKeyboardPassage(from,to,match=currentKeyboardPassage().match){
+  const draft=keyboardDrafts.get(piece.id);
+  if(draft&&from!==draft.startBar){toast('Keep or discard the current take before choosing another start bar.');return;}
+  keyboardPassages.set(piece.id,{from,to,match});
+  stopPlayback(false);clearStepEntry();setCursor(timeSig[from].t,false);
+  if(pref.follow)glideToCursor();
+  syncComposerPiano();drawKeyboardPreview();
+}
+function keyboardPassageDialog(){
+  const passage=currentKeyboardPassage(),draft=keyboardDrafts.get(piece.id), max=timeSig.length;
+  const saved=mode==='compose'&&!draft?acceptedKeyboardTake(passage.from):null;
+  openDialog('Section and recording',
+    numberField('section-first','Start bar',draft?draft.startBar+1:passage.from+1,1,max)+
+    numberField('section-last','End bar (0 = auto)',draft?(draft.chosenEnd===null?0:draft.chosenEnd+1):passage.to===null?0:passage.to+1,0,max)+
+    selectField('section-assist','Timing assist',TIMING_ASSIST,draft?.assist??pref.recordAssist)+
+    (mode==='practice'?numberField('section-speed','Practice speed (%)',practice.rate,25,125):'')+
+    (mode==='compose'?checkField('section-match','Match nearby pitches to the score in Strong mode',draft?.match??passage.match):'')+
+    (saved?button('review-saved-take','Adjust last saved take','button','sliders'):'')+
+    hint('Tap the score to set the start bar. Off keeps your timing. Gentle nudges close notes, Balanced pulls more strongly, and Strong snaps notes toward the closest rhythmic grid.'),
+    'Apply',form=>{
+      const from=draft?draft.startBar:nval(form,'section-first')-1, value=nval(form,'section-last');
+      const last=value===0?null:clamp(value-1,from,max-1);
+      const match=mode==='compose'&&bool(form,'section-match');
+      pref.recordAssist=form.get('section-assist');
+      if(mode==='practice')practice.rate=nval(form,'section-speed');
+      if(draft){
+        draft.chosenEnd=last;draft.end=last===null?scoreTickCapacity():timeSig[last].end;
+        draft.assist=pref.recordAssist;draft.match=match;
+        rebuildKeyboardDraft(draft);
+      }
+      setKeyboardPassage(from,last,match);storeLocal();
+    });
+  if(draft)$('section-first').disabled=true;
+  if(saved)$('review-saved-take').onclick=()=>{
+    const assist=$('section-assist').value, match=$('section-match').checked;
+    $('dialog').close();
+    const bar=timeSig[saved.startBar];
+    const end=saved.chosenEnd===null?scoreTickCapacity():timeSig[saved.chosenEnd]?.end??scoreTickCapacity();
+    const review={...saved,assist,match,end,bpm:bar.bpm,pulse:keyboardPulse(bar),replaces:saved.id};
+    keyboardDrafts.set(piece.id,review);rebuildKeyboardDraft(review);syncComposerPiano();
+  };
+}
+function scoreTickCapacity(){
+  const last=timeSig.at(-1);
+  return last.end+(512-timeSig.length)*meterLength(last.meter);
+}
+function previousKeyboardNotes(){
+  const take=composerTake?.origin===piece.id?composerTake:keyboardDrafts.get(piece.id);
+  if(!take?.replaces)return null;
+  const previous=piece.keyboardTakes?.find(t=>t.id===take.replaces);
+  return previous?new Set(previous.noteIds):null;
+}
+function keyboardPreviewBarCount(){
+  const live=composerTake?.origin===piece.id?composerTake.previewEnd??0:0;
+  const draft=keyboardDrafts.get(piece.id);
+  const end=Math.max(live,draft?.previewEnd??0);
+  if(!end)return piece.bars;
+  const copy={...piece,notes:[]};ensureLength(copy,end);return copy.bars;
+}
+function extendKeyboardPreview(end){
+  if(!composerTake||end<=timeSig.at(-1).end)return;
+  composerTake.previewEnd=Math.min(scoreTickCapacity(),Math.ceil(end));
+  renderScore();
+}
+function rebuildKeyboardDraft(draft){
+  const replaced=draft.replaces&&piece.keyboardTakes?.find(t=>t.id===draft.replaces);
+  const replacedIds=new Set(replaced?.noteIds||[]);
+  const targets=draft.match?piece.notes.filter(n=>!replacedIds.has(n.id)&&n.t>=draft.start&&n.t<draft.end):[];
+  const corrected=adjustPerformance(draft.raw,draft.assist,draft.start,draft.pulse,draft.bpm,targets);
+  draft.corrected=corrected.filter(n=>n.t<draft.end).map(n=>({...n,d:Math.min(n.d,draft.end-n.t)}))
+    .map(n=>note(n.p,n.t,n.d,Number(piece.staves===2&&n.p<60),n.v));
+  draft.previewEnd=draft.corrected.reduce((max,n)=>Math.max(max,n.t+n.d),draft.start);
+  renderScore();
+  draft.endBar=measureAt(timeSig,Math.max(draft.start,draft.previewEnd-1)).i;
+}
+function drawKeyboardPreview(now=performance.now()){
+  const layer=$('piano-preview');
+  if(!layer||!geometry.length)return;
+  const draft=keyboardDrafts.get(piece.id), live=composerTake?.origin===piece.id?composerTake:null;
+  const items=live?keyboardTakeEvents(live,now):draft?.corrected||[];
+  const passage=currentKeyboardPassage(), b=geometry[passage.from], y=sheetRows[b.row].y;
+  let markup=pianoExpanded?'<line class="section-start" x1="'+(b.x+SHEET_LEFT+2)+'" x2="'+(b.x+SHEET_LEFT+2)+'" y1="'+(y+31)+'" y2="'+(y+staffY(piece.staves-1)+6)+'"/>':'';
+  const viewport=$('score-scroll'), scale=sheetScale;
+  const scroll=viewport.scrollLeft||0, top=viewport.scrollTop||0, width=viewport.clientWidth||900,height=viewport.clientHeight||400;
+  const represented=new Set();
+  for(const n of items){
+    if(n.t>=timeSig.at(-1).end)continue;
+    const pos=sheetPoint(n.t);
+    if(pref.sheetLayout==='rows'&&(pos.y*scale<top-height||pos.y*scale>top+height*2)||
+       pref.sheetLayout!=='rows'&&(pos.x*scale<scroll-width||pos.x*scale>scroll+width*2))continue;
+    const staff=n.s??Number(piece.staves===2&&n.p<60);
+    represented.add(pos.b.i+'/'+staff);
+    const pitched={...n,s:staff}, written=spelling(pitched,pos.b);
+    const accidental=written.acc===keyAccidental(pos.b.key,written.degree)?null:written.acc;
+    const noteGlyph=glyphAt(pitched,pos.b,pos.x,accidental,Math.min(n.d,pos.b.end-n.t),true);
+    markup+='<g class="'+(n.held?'take-held':'take-note')+'" transform="translate(0 '+pos.y+')">'+noteGlyph+'</g>';
+  }
+  layer.innerHTML=markup;
+  $('sheet').querySelectorAll('[data-empty-rest]').forEach(rest=>{
+    rest.classList.toggle('take-in-bar',represented.has(rest.dataset.emptyRest));
+  });
+}
+function keepKeyboardDraft(){
+  if(composerTake)return;
+  const draft=keyboardDrafts.get(piece.id);
+  if(!draft)return;
+  const notes=draft.corrected;
+  const saved={id:nextId(),start:draft.start,startBar:draft.startBar,endBar:draft.endBar,chosenEnd:draft.chosenEnd,
+    assist:draft.assist,match:draft.match,raw:draft.raw};
+  const replaced=piece.keyboardTakes?.find(t=>t.id===draft.replaces);
+  keyboardDrafts.delete(piece.id);
+  const count=placePianoNotes(notes,draft.previewEnd,saved,replaced);
+  if(!count){
+    keyboardDrafts.set(piece.id,draft);renderScore();syncComposerPiano();
+    toast('No new notes fit. Change the section or timing assist, or discard the take.');
+  }else toast(count+' '+(count===1?'note added':'notes added')+' to the score. Original timing saved.');
+}
+function discardKeyboardDraft(){
+  if(composerTake)return;
+  const draft=keyboardDrafts.get(piece.id);
+  if(!draft)return;
+  stopPlayback(false);
+  const start=draft.start;
+  if(draft.previous){
+    keyboardDrafts.set(piece.id,draft.previous);rebuildKeyboardDraft(draft.previous);
+  }else{keyboardDrafts.delete(piece.id);renderScore();}
+  setCursor(start,pref.follow);syncComposerPiano();
+}
+function replayKeyboardSection(){
+  if(composerTake)return;
+  const passage=currentKeyboardPassage(), draft=keyboardDrafts.get(piece.id);
+  const from=draft?.startBar??passage.from;
+  const to=clamp(passage.to??draft?.endBar??acceptedKeyboardTake(from)?.endBar??(loop.enabled?Math.max(from,loop.to-1):from),from,timeSig.length-1);
+  stopPlayback(false);
+  const start=timeSig[from].t, end=timeSig[to].end;
+  setCursor(start,false);
+  const prior=draft&&piece.keyboardTakes?.find(t=>t.id===draft.replaces);
+  sectionPlayback={start,end,notes:draft?.corrected||[],excluded:prior?new Set(prior.noteIds):null};
+  startPlayback();
+}
+function attachKeyboardPassage(){
+  $('keys-section').onclick=$('piano-take-settings').onclick=keyboardPassageDialog;
+  $('keys-replay').onclick=replayKeyboardSection;
+  $('keys-record').onclick=()=>mode==='record'?activateRecorderControl():composerTake?finishComposerTake():startComposerTake();
+  for(const id of ['keys-keep','piano-keep'])$(id).onclick=keepKeyboardDraft;
+  for(const id of ['keys-discard','piano-discard'])$(id).onclick=discardKeyboardDraft;
+  $('score-scroll').addEventListener('scroll',()=>{
+    if(composerTake||keyboardDrafts.has(piece.id))drawKeyboardPreview();
+  },{passive:true});
 }
 
 const PIANO_LIMIT=300;
@@ -3333,7 +3752,7 @@ async function startPianoTake(){
   if(pref.inputMuted){toast('Turn note input on before recording.');return;}
   if(!navigator.mediaDevices?.getUserMedia){toast('Piano recording needs microphone access. Open Notely in a browser that supports microphone recording.');return;}
   const take={phase:'requesting',samples:0,chunks:[],sampleRate:0,peak:0,level:0,
-    bpm:piece.bpm,detail:localRecordDetail,sensitivity:pref.pianoSensitivity,muteAudio:pref.pianoMute,
+    bpm:piece.bpm,assist:pref.recordAssist,detail:localRecordDetail,sensitivity:pref.pianoSensitivity,muteAudio:pref.pianoMute,
     lastMeterAt:-Infinity,origin:piece.id,background:false,clipped:false,progress:0};
   pianoTake=take;pianoMessage='';refreshPianoUI();
   try{
@@ -3451,6 +3870,7 @@ function processPianoTake(take){
         const meter=$('piano-progress'),label=$('piano-stage');
         if(meter)meter.value=data.percent;
         if(label)label.textContent=data.stage+' · '+data.percent+'%';
+        if(pianoExpanded&&mode==='record')$('keys-take-status').textContent=data.stage+' · '+data.percent+'%';
         return;
       }
       if(data.type==='error'){
@@ -3479,7 +3899,7 @@ function savePianoNotes(take,result){
   }
   const events=notes.map(n=>({id:nextId(),p:n.p,on:n.on,off:n.off,
     v:clamp(Math.round(38+n.amplitude*82),32,120),source:'piano-mic'}));
-  const raw={version:1,source:'piano-mic',bpm:take.bpm,duration:pianoSeconds(take),events,pedal:[],
+  const raw={version:1,source:'piano-mic',bpm:take.bpm,assist:take.assist,duration:pianoSeconds(take),events,pedal:[],
     notationStart:events[0].on};
   const open=!take.background&&mode==='record'&&piece.id===take.origin;
   pianoTake=null;
@@ -3528,6 +3948,7 @@ function renderCatalog(){
 function renderHeader(){
   const category=piece.category||(piece.raw?'Recorded take':'My score');
   $('title').textContent=piece.title;$('paper-title').textContent=piece.title;
+  $('keys-title').textContent=piece.title;
   $('paper-credit').textContent=piece.credit||(piece.raw?'Piano recording':'Original composition');
   $('subtitle').innerHTML='<b>'+escapeHTML(category)+'</b><span>'+escapeHTML(namesForKey(piece.key,piece.minor))+' '+(piece.minor?'':'major')+'</span><span>·</span><span>'+piece.time.beats+'/'+piece.time.unit+' time</span><span>·</span><span>'+piece.bars+' measures</span>'+(modified[piece.id]?' <span>· Draft</span>':'');
   $('paper-mark').textContent='♩ = '+piece.bpm;
@@ -3545,6 +3966,7 @@ function render(){
   setCursor(cursor,false);
   $('seek').max=timeSig.at(-1).end;$('seek').value=cursor;
   applyView();renderInspector();showInputs();
+  if(pianoExpanded&&pianoRenderedStaves!==piece.staves)renderPiano();
 }
 function setMode(next){
   if(mode!==next){
@@ -3598,13 +4020,15 @@ function renderInspector(){
       (piano?(status||'Piano microphone'):'<b id="note-count">'+(recording?.events.length||0)+'</b> notes captured')+'</span></div>'+
       livePanel+selectField('record-source','Recording input',[['piano-mic','Piano mic (chords)'],['live','Keyboard and live notes']],pref.recordInput)+
       '<div class="record-detail">'+selectField('record-detail','Notation detail',displayDetail,localRecordDetail)+'</div>'+
+      '<div class="record-detail">'+selectField('record-assist','Timing assist',TIMING_ASSIST,pref.recordAssist)+'</div>'+
       button('take',label,'button primary wide',phase==='capturing'||recording?'stop':phase==='processing'||phase==='requesting'?'close':'record')+
       '<div class="right-section">'+(piano?hint('Play one piano, including chords. Stop to turn the take into editable notes. Audio stays in memory during the take and is discarded after processing.')+
         (pianoMessage&&!take?'<p class="hint record-message" role="status">'+escapeHTML(pianoMessage)+'</p>':'')+
         button('piano-mic-settings','Piano mic settings','button wide','sliders'):
         hint('Play the on-screen piano or use an input device. Live microphone input follows one pitch at a time.')+button('record-input','Connect input','button wide','plug'))+
       (piece.raw?button('convert-take','Change this take’s notation','button wide','sliders'):'')+'</div>';
-    $('record-source').disabled=taking;$('record-detail').disabled=taking;
+    $('record-source').disabled=taking;$('record-detail').disabled=taking;$('record-assist').disabled=taking;
+    $('record-assist').onchange=e=>{pref.recordAssist=e.target.value;storeLocal();};
     $('take').disabled=phase==='stopping';
     $('record-source').onchange=e=>{pref.recordInput=e.target.value;storeLocal();renderInspector();};
     $('record-detail').onchange=e=>{localRecordDetail=e.target.value;storeLocal();};$('take').onclick=activateRecorderControl;
@@ -3838,12 +4262,13 @@ function tunerDialog(){
 function convertDialog(){
   if(!piece.raw)return;
   openDialog('Recording notation',selectField('detail-format','Detail level',displayDetail,piece.detail||'basic')+
-    hint('Basic uses an eighth-note grid. Advanced preserves velocity on a finer grid. Full detail uses the original timing, velocity and pedal data in playback.')+
+    selectField('take-assist','Timing assist',TIMING_ASSIST,piece.raw.assist??'off')+
+    hint('Timing assist changes placement and note length. Choose Off for your original timing. Full detail keeps velocity and preserves subtick timing when assist is off.')+
     checkField('keep-original-edits','Create a new score with this view',true)+
     hint('Applying a different view in this score rebuilds the edited notation from the original take. Undo and saved versions can recover the previous edits.'),
     'Apply notation',form=>{
       const detail=form.get('detail-format');
-      const apply=()=>{piece.notes=makeTake(piece.raw,detail,piece.raw.bpm);piece.staves=piece.notes.some(n=>n.s===1)?2:1;piece.feel=detail==='full';piece.detail=detail;ensureLength(piece);selected=null;};
+      const apply=()=>{piece.raw.assist=form.get('take-assist');piece.notes=makeTake(piece.raw,detail,piece.raw.bpm);piece.staves=piece.notes.some(n=>n.s===1)?2:1;piece.feel=detail==='full';piece.detail=detail;ensureLength(piece);selected=null;};
       if(bool(form,'keep-original-edits')){const copy=duplicate(piece.title+' · '+displayDetail.find(x=>x[0]===detail)[1]);switchScore(copy.id);}
       touch(apply);
     });
@@ -3872,7 +4297,7 @@ function helpDialog(){
   openDialog('Controls & shortcuts',
     hint('<b>Compose.</b> Tap empty staff space to insert a note. Activate Move or double-tap a note, then drag it to change pitch or timing. Tap away to leave Move. To add linked notes, choose Extend note in the inspector or hold the note to open its options.')+
     hint('<b>Play.</b> Tap the bar number or use the playhead slider to choose where playback starts. Use Space to play or pause. Open View to switch between a horizontal strip and rows, hide the playhead, or open the sheet on its own.')+
-    hint('<b>Piano input.</b> In Compose, Enter notes places notes or chords at the playhead. Choose Record into score to capture the timing of a performance. Expand the keyboard to show higher and lower rows.')+
+    hint('<b>Piano input.</b> Enter notes places notes or chords at the playhead. Record into score captures a performance. Open Score + Keys to see notes while you play, replay a section, or adjust a take.')+
     hint('<b>Keyboard.</b> A, W, S, E, D, F, T, G, Y, H, U, J and the keys to their right play the piano. 1–6 set the note length. Delete removes the note. Up and Down move it by a semitone. Ctrl/Cmd+Z undoes an edit, and Ctrl/Cmd+Shift+Z redoes it.')+
     hint('<b>Practice.</b> Choose your staff and reference playback. Use Measure to mark a recovery point or choose a particular measure in Retry settings.')+
     hint('<b>Privacy.</b> Takes and versions stay in this browser. The microphone is processed on your device. Export a Notely project to move a score or back it up.'));
@@ -4438,12 +4863,22 @@ function validImport(content){
     ids.set(n.id,sanitized.id);return sanitized;
   });
   result.notes.forEach((n,i)=>{const old=src.notes[i];if(ids.has(old.tie))n.tie=ids.get(old.tie);if(ids.has(old.link))n.link=ids.get(old.link);});
+  if(Array.isArray(src.keyboardTakes)){
+    const bar=i=>clamp(Math.floor(Number(i)||0),0,511);
+    result.keyboardTakes=src.keyboardTakes.filter(t=>typeof t?.id==='string'&&Array.isArray(t.noteIds)&&Array.isArray(t.raw))
+      .map(t=>({id:t.id.slice(0,80),start:clamp(Math.floor(Number(t.start)||0),0,2000000),startBar:bar(t.startBar),endBar:bar(t.endBar),
+        chosenEnd:t.chosenEnd==null?null:bar(t.chosenEnd),assist:TIMING_ASSIST.some(([v])=>v===t.assist)?t.assist:'off',match:!!t.match,
+        noteIds:t.noteIds.filter(id=>ids.has(id)).map(id=>ids.get(id)),
+        raw:t.raw.slice(0,30000).filter(n=>n&&Number.isInteger(n.p)&&n.p>=21&&n.p<=108&&Number.isInteger(n.t)&&n.t>=0&&n.t<=2000000&&
+          Number.isInteger(n.d)&&n.d>0&&n.d<=2000000&&Number.isFinite(n.v)&&n.v>=1&&n.v<=127).map(({p,t,d,v})=>({p,t,d,v}))}));
+  }
   if(Array.isArray(src.pedal))result.pedal=src.pedal.filter(e=>Number.isInteger(e?.t)&&e.t>=0&&e.t<2000000&&Number.isInteger(e.value)&&e.value>=0&&e.value<=127&&Number.isInteger(e.channel)&&e.channel>=0&&e.channel<16).slice(0,100000).sort((a,b)=>a.t-b.t);
   if(Array.isArray(src.raw?.events)&&src.raw.events.length<=30000&&tempoOk(src.raw.bpm)){
     const validEvent=n=> Number.isInteger(n?.p)&&n.p>=0&&n.p<=127&&Number.isFinite(n.on)&&Number.isFinite(n.off)&&n.on>=0&&n.off>=n.on&&n.off<86400&&Number.isFinite(n.v)&&n.v>=1&&n.v<=127;
     if(src.raw.events.every(validEvent)){
       const controls=Array.isArray(src.raw.pedal)?src.raw.pedal.filter(e=>Number.isFinite(e?.on)&&e.on>=0&&Number.isInteger(e.channel)&&e.channel>=0&&e.channel<16&&Number.isInteger(e.value)&&e.value>=0&&e.value<=127):[];
       result.raw={version:1,bpm:src.raw.bpm,duration:src.raw.duration,events:src.raw.events,pedal:controls};
+      if(TIMING_ASSIST.some(([v])=>v===src.raw.assist))result.raw.assist=src.raw.assist;
       if(src.raw.source==='piano-mic'){
         result.raw.source='piano-mic';
         result.raw.notationStart=clamp(Number(src.raw.notationStart)||0,0,86400);
@@ -4665,7 +5100,7 @@ function applyView(){
   viewport.classList.toggle('score-rows',pref.sheetLayout==='rows');
   viewport.classList.toggle('score-grand',piece.staves===2);
   viewport.classList.toggle('hide-guide',!pref.guide);
-  viewport.classList.toggle('reading-score',pref.sheetOnly||mode!=='compose');
+  viewport.classList.toggle('reading-score',pianoExpanded||pref.sheetOnly||mode!=='compose');
   $('sheet-view').classList.toggle('on',pref.sheetLayout==='rows'||!pref.guide);
   $('focus-top').hidden=!pref.sheetOnly;
   syncFocusControls();
@@ -4774,7 +5209,7 @@ function attachStudio(){
   const octave=delta=>{pref.octave=clamp(pref.octave+delta,0,6);storeLocal();renderPiano();};
   $('octave-down').onclick=()=>octave(-1);$('octave-up').onclick=()=>octave(1);
   const toggle=()=>playing||recoveryTimer?stopPlayback(false):startPlayback();
-  $('play').onclick=$('focus-play').onclick=toggle;
+  $('play').onclick=$('focus-play').onclick=$('keys-play').onclick=toggle;
   $('stop').onclick=$('focus-stop').onclick=()=>{finishComposerTake();clearStepEntry();stopPlayback(true);};
   $('rewind').onclick=()=>{
     finishComposerTake();clearStepEntry();
@@ -4789,6 +5224,7 @@ function attachStudio(){
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if($('dialog').open)return;
+      if(!$('piano-row-settings').hidden){e.preventDefault();toggleKeySettings(false);return;}
       if(pianoExpanded){e.preventDefault();setPianoExpanded(false);return;}
       if(pref.sheetOnly){e.preventDefault();leaveSheetView();return;}
       closeRadial();lastHit=null;setMoveNotes(false);if(linkFrom){clearLink();renderScore();}return;
