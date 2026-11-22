@@ -151,6 +151,14 @@ body.score-keys{overflow:hidden}
 }
 #sheet .replaced-take-note{opacity:.25}
 #sheet .take-in-bar{visibility:hidden}
+
+.computer-key-list{display:grid;gap:6px;max-height:min(47dvh,305px);overflow:auto;padding:4px 5px 4px 3px;scrollbar-gutter:stable}
+.computer-key-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 34px;gap:7px;align-items:center}
+.computer-key-row input,.computer-key-row select{width:100%;min-width:0;color:var(--ink);background:var(--panel);
+  border:1px solid var(--border);border-radius:7px;padding:7px;font:inherit}
+.computer-key-row input{cursor:pointer}
+.computer-key-row input:focus{border-color:var(--accent);background:var(--accent-soft)}
+.computer-key-actions{display:flex;gap:7px;flex-wrap:wrap}
 </style>
 <!-- Embedded asset licenses
 Copyright © 2026, Steinberg Media Technologies GmbH (http://www.steinberg.net/),
@@ -1859,7 +1867,7 @@ THE SOFTWARE.
     </section>
     <section id="passage-controls" class="passage-controls" aria-label="Play and record a passage" hidden>
       <button id="keys-play" class="play" data-icon="play" aria-label="Play"></button>
-      <button id="keys-replay" class="tool" data-icon="restart">Replay</button>
+      <button id="keys-replay" class="tool" data-icon="restart">Replay section</button>
       <button id="keys-section" class="tool" data-icon="bars"><span id="keys-section-label">Bar 1</span></button>
       <div class="passage-actions">
         <button id="keys-record" class="button" data-icon="record"><span id="keys-record-label">Record</span></button>
@@ -1876,13 +1884,15 @@ THE SOFTWARE.
           <output id="octaves" aria-label="Main keyboard range">C4–B5</output>
           <button class="icon-btn small" id="octave-up" data-icon="right" title="Higher main octave" aria-label="Higher main octave"></button>
           <button id="input-settings" class="icon-btn small" data-icon="plug" aria-label="MIDI and microphone input" title="Connect input"></button>
-          <button id="keyboard-settings" class="icon-btn small" data-icon="sliders" aria-label="Keyboard size and octave rows" title="Keyboard size and octave rows" aria-expanded="false"></button>
+          <button id="computer-keys" class="icon-btn small" data-icon="keyboard" aria-label="Computer key mappings" title="Computer key mappings"></button>
+          <button id="keyboard-settings" class="icon-btn small" data-icon="sliders" aria-label="Piano range and key size" title="Piano range and key size" aria-expanded="false"></button>
           <button id="expand-piano" class="icon-btn" data-icon="expand" aria-label="Open Score and Keys" title="Score + Keys" aria-expanded="false"></button>
         </div>
       </div>
       <div class="piano-entry-bar" id="piano-entry">
         <button class="tool" id="piano-step" data-icon="note" aria-pressed="false">Enter notes</button>
         <button class="tool" id="piano-capture" data-icon="record" aria-pressed="false"><span id="piano-capture-label">Record into score</span></button>
+        <button id="piano-audition" class="tool" data-icon="play" aria-pressed="false" hidden><span id="piano-audition-label">Play take</span></button>
         <button id="piano-take-settings" class="tool" data-icon="sliders" hidden>Take settings</button>
         <button id="piano-keep" class="button primary" hidden>Keep take</button>
         <button id="piano-discard" class="icon-btn" data-icon="close" aria-label="Discard take" title="Discard take" hidden></button>
@@ -2082,7 +2092,7 @@ for(const entry of MUSIC_ARCHIVE){
 builtins.forEach((s,i)=>{s.id='repertoire-'+i;s.notes.forEach((n,j)=>n.id=s.id+'-n'+j);});
 function makeTake(raw,detail,bpm){
   const quant=detail==='basic'?48:detail==='advanced'?12:1;
-  const piano=raw.source==='piano-mic', start=piano?raw.notationStart||0:0;
+  const piano=raw.source==='piano-mic', start=raw.notationStart||0;
   const events=piano?[...raw.events].sort((a,b)=>a.on-b.on||a.p-b.p):raw.events;
   const lastByPitch=new Map();let chordOn=-Infinity;
   if(raw.assist){
@@ -2193,6 +2203,7 @@ const ICONS={
  metro:'<path d="M7 4h10l4 16H3L7 4Zm5 12 5-8m-5 8v1"/>',
  loop:'<path d="M4 10V7a2 2 0 0 1 2-2h13m-3-3 3 3-3 3m4 6v3a2 2 0 0 1-2 2H5m3-3-3 3 3 3"/>',
  volume:'<path d="M3 9v6h4l5 4V5L7 9H3Zm12 0c2 1.4 2 4.6 0 6m3-9a8 8 0 0 1 0 12"/>',
+ keyboard:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M7 15h10"/>',
  piano:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7.5 5v8m4.5-8v14m4.5-14v8M7.5 15v4m9-4v4"/>',
  plug:'<path d="M8 3v5m8-5v5m-10 0h12v3a6 6 0 0 1-12 0V8Zm6 9v4"/>',
  left:'<path d="m15 6-6 6 6 6"/>',right:'<path d="m9 6 6 6-6 6"/>',
@@ -2237,7 +2248,7 @@ function goHistory(direction){
 function switchScore(id){
   finishComposerTake();clearStepEntry();stopPlayback(false);leaveRecording();closeRadial();
   piece=clone(works[id]||builtins.find(s=>s.id===id));
-  selected=null;clearLink();setMoveNotes(false);cursor=0;undoStack=[];redoStack=[];lastHit=null;
+  selected=null;clearLink();setMoveNotes(false);cursor=piece.raw?firstScoreNote(piece):0;undoStack=[];redoStack=[];lastHit=null;
   loop={enabled:false,from:1,to:Math.min(2,piece.bars)};
   resetCamera();$('library').classList.remove('open');
   if(pianoExpanded)showKeyboardDrawer('');
@@ -2839,14 +2850,19 @@ function liveOff(token){
   if(event){event.off=recordElapsed();recording.held.delete(token);}
   composerKeyOff(token);
 }
+function firstScoreNote(score){
+  const first=score.notes.reduce((min,n)=>n.s<score.staves?Math.min(min,n.t):min,Infinity);
+  return Number.isFinite(first)?first:0;
+}
 function prepareEvents(from){
   const end=limitTick();
   const previews=sectionPlayback?.notes||[];
-  const original=sectionPlayback?.excluded?piece.notes.filter(n=>!sectionPlayback.excluded.has(n.id)):piece.notes;
+  const original=sectionPlayback?.take?[]:sectionPlayback?.excluded?
+    piece.notes.filter(n=>!sectionPlayback.excluded.has(n.id)):piece.notes;
   const filled=previews.length?new Set(original.map(n=>n.t+'/'+n.p+'/'+n.s)):null;
   const all=previews.length?original.concat(previews.filter(n=>!filled.has(n.t+'/'+n.p+'/'+n.s))):original;
   const byId=new Map(all.map(n=>[n.id,n]));
-  const continuations=new Set(piece.notes.filter(n=>n.tie&&byId.get(n.tie)?.p===n.p&&Math.abs(byId.get(n.tie).t-n.t-n.d)<=1).map(n=>n.tie));
+  const continuations=new Set(all.filter(n=>n.tie&&byId.get(n.tie)?.p===n.p&&Math.abs(byId.get(n.tie).t-n.t-n.d)<=1).map(n=>n.tie));
   const durationOf=n=>{
     let endTick=n.t+n.d, tail=n;
     const visited=new Set();
@@ -2884,9 +2900,13 @@ function startPlayback(recovering=false){
   finishComposerTake();clearStepEntry();
   clearTimeout(recoveryTimer);recoveryTimer=0;
   if(playing)return;
+  const draft=mode==='compose'&&keyboardDrafts.get(piece.id);
+  if(!sectionPlayback&&draft){playKeyboardTake();return;}
+  if(pianoPlaybackMuted()){toast('Stop the microphone take before starting playback.');playerStatus();return;}
   if(!sectionPlayback&&(cursor>=limitTick()||loop.enabled&&cursor<startLoop())){seekPlayback(loop.enabled?startLoop():0,0,true,recovering);return;}
   if(mode==='practice'&&!recovering)practiceRun={id:nextId(),when:new Date().toISOString(),piece:piece.title,hit:0,miss:0,extra:0,retries:0,errors:0,start:measure().i+1};
   stopStandaloneClick();audioReady();
+  if(pref.soundMuted||pref.volume===0)toast('Playback audio is muted. Check the Sound controls.');
   baseTick=cursor;playStart=audio.currentTime+.085;originSeconds=timeAt(timeSig,baseTick);
   prepareEvents(baseTick);anticipated=[];lastMetro=-1;
   playing=true;playerStatus();pump();playTimer=setInterval(pump,24);frame=requestAnimationFrame(tickPlayer);
@@ -3007,11 +3027,21 @@ function stopPlayback(home=false,keepPractice=false){
 }
 function playerStatus(){
   const active=playing||!!recoveryTimer;
-  for(const id of ['play','focus-play','keys-play']){
-    const p=$(id);
-    if(p.getAttribute('aria-label')===(active?'Pause':'Play')&&p.querySelector('.ico'))continue;
-    p.dataset.icon=active?'pause':'play';p.innerHTML=icon(p.dataset.icon);
-    p.setAttribute('aria-label',active?'Pause':'Play');
+  const preview=mode==='compose'&&!composerTake&&keyboardDrafts.has(piece.id);
+  for(const id of ['play','focus-play','keys-play','piano-audition']){
+    const p=$(id), audition=id==='piano-audition';
+    const paused=audition?active&&!!sectionPlayback?.take:active;
+    const label=paused?(audition?'Pause take':'Pause'):audition||preview?'Play take':'Play';
+    if(p.getAttribute('aria-label')!==label||!p.querySelector('.ico')){
+      p.dataset.icon=paused?'pause':'play';
+      if(audition){
+        const glyph=p.querySelector('.ico');
+        if(glyph)glyph.outerHTML=icon(p.dataset.icon);
+        $('piano-audition-label').textContent=label;p.setAttribute('aria-pressed',String(paused));
+      }else p.innerHTML=icon(p.dataset.icon);
+      p.setAttribute('aria-label',label);
+      p.title=label;
+    }
   }
 }
 function updatePlayhead(follow){
@@ -3041,7 +3071,7 @@ function finishRecording(){
   if(!recording)return;
   clearInterval(recordTimer);recordTimer=0;
   const elapsed=recordElapsed(), take=recording;recording=null;
-  const raw={version:1,bpm:take.bpm,assist:take.assist,duration:elapsed,events:take.events.map(n=>({...n,off:n.off??elapsed})),pedal:take.pedal};
+  const raw={version:1,bpm:take.bpm,assist:take.assist,notationStart:take.events[0]?.on??0,duration:elapsed,events:take.events.map(n=>({...n,off:n.off??elapsed})),pedal:take.pedal};
   if(!raw.events.length){if(mode==='record')renderInspector();toast('No notes were captured.');return;}
   saveRecordedScore(raw,localRecordDetail,true,'Piano take');
   toast('Piano take saved. The original note data is preserved.');
@@ -3050,10 +3080,10 @@ function saveRecordedScore(raw,detail,open,title){
   const notes=makeTake(raw,detail,raw.bpm);
   const name=title+' '+new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
   const created=score(name,{notes,bars:1,staves:notes.some(n=>n.s===1)?2:1,bpm:raw.bpm,raw,detail,feel:detail==='full'});
-  created.pedal=raw.pedal.map(event=>({t:Math.round(event.on*raw.bpm*PPQ/60),type:'pedal',value:event.value,channel:event.channel}));
+  created.pedal=raw.pedal.map(event=>({t:Math.round(Math.max(0,event.on-(raw.notationStart||0))*raw.bpm*PPQ/60),type:'pedal',value:event.value,channel:event.channel}));
   ensureLength(created);works[created.id]=created;
   if(!open){storeLocal();renderCatalog();return;}
-  stopPlayback(false);piece=created;cursor=0;selected=null;undoStack=[];redoStack=[];
+  stopPlayback(false);piece=created;cursor=firstScoreNote(created);selected=null;undoStack=[];redoStack=[];
   loop={enabled:false,from:1,to:Math.min(2,created.bars)};resetCamera();syncPiece();render();
 }
 function formatTime(seconds){
@@ -3161,7 +3191,91 @@ function micTick(now){
   }
 }
 
-const keyShortcuts='awsedftgyhujkolp;'.split('');
+const DEFAULT_COMPUTER_KEYS=['KeyA','KeyW','KeyS','KeyE','KeyD','KeyF','KeyT','KeyG','KeyY','KeyH','KeyU','KeyJ','KeyK','KeyO','KeyL','KeyP','Semicolon'];
+const KEY_SYMBOLS={Backquote:'`',Minus:'-',Equal:'=',BracketLeft:'[',BracketRight:']',Backslash:'\\',
+  Semicolon:';',Quote:"'",Comma:',',Period:'.',Slash:'/'};
+function computerKeyLabel(code){
+  if(/^Key[A-Z]$/.test(code))return code.slice(3);
+  if(/^Digit[0-9]$/.test(code))return code.slice(5);
+  if(/^Numpad[0-9]$/.test(code))return 'Num '+code.slice(6);
+  return Object.hasOwn(KEY_SYMBOLS,code)?KEY_SYMBOLS[code]:'';
+}
+function computerKeyCode(event){
+  if(event.code&&event.code!=='Unidentified')return event.code;
+  const key=event.key||'';
+  if(/^[a-z]$/i.test(key))return 'Key'+key.toUpperCase();
+  if(/^\d$/.test(key))return 'Digit'+key;
+  return Object.keys(KEY_SYMBOLS).find(code=>KEY_SYMBOLS[code]===key)||'';
+}
+function defaultComputerKeys(octave=4){
+  return DEFAULT_COMPUTER_KEYS.map((code,i)=>({code,p:(octave+1)*12+i,label:computerKeyLabel(code)}))
+    .filter(binding=>binding.p>=21&&binding.p<=108);
+}
+function readComputerKeys(){
+  if(!Array.isArray(pref.computerKeys))return defaultComputerKeys();
+  const seen=new Set();
+  return pref.computerKeys.filter(binding=>{
+    if(!binding||!computerKeyLabel(binding.code)||!Number.isInteger(binding.p)||binding.p<21||binding.p>108||seen.has(binding.code))return false;
+    seen.add(binding.code);return true;
+  }).map(binding=>({...binding,label:typeof binding.label==='string'&&binding.label.length<=6&&binding.label?binding.label:computerKeyLabel(binding.code)}));
+}
+let computerKeys=readComputerKeys();
+function releaseComputerKeys(){
+  for(const token of heldVoices.keys())if(token.startsWith('kb:'))liveOff(token);
+}
+function computerKeysDialog(){
+  toggleKeySettings(false);releaseComputerKeys();
+  let pending=computerKeys.map(binding=>({...binding}));
+  const pitchOptions=Array.from({length:88},(_,i)=>[i+21,pitchName(i+21)]);
+  openDialog('Computer key mappings',
+    hint('Choose a piano note, then select its computer key field and press the key you want. These assignments stay the same when you change the visible piano range.')+
+    '<div id="computer-key-list" class="computer-key-list"></div>'+
+    '<p class="hint" id="computer-key-status" role="status"></p>'+
+    '<div class="computer-key-actions">'+button('computer-key-add','Add mapping','button','plus')+
+    button('computer-key-reset','Restore defaults','button','undo')+'</div>',
+    'Save mappings',()=>{
+      releaseComputerKeys();computerKeys=pending.filter(binding=>binding.code);
+      pref.computerKeys=computerKeys;storeLocal();renderPiano();
+    },'computer-keys');
+  function draw(){
+    const list=$('computer-key-list');
+    list.innerHTML=pending.map((binding,i)=>'<div class="computer-key-row">'+
+      '<input type="text" readonly id="computer-key-'+i+'" aria-label="Computer key for mapping '+(i+1)+'" value="'+escapeHTML(binding.label||'')+'" placeholder="Press a key">'+
+      '<select id="computer-pitch-'+i+'" aria-label="Piano note for mapping '+(i+1)+'">'+pitchOptions.map(([p,label])=>option(p,label,binding.p)).join('')+'</select>'+
+      '<button type="button" class="icon-btn" id="computer-remove-'+i+'" aria-label="Remove mapping '+(i+1)+'" title="Remove mapping">'+icon('close')+'</button></div>').join('');
+    pending.forEach((binding,i)=>{
+      const input=$('computer-key-'+i);
+      input.onkeydown=event=>{
+        if(event.key==='Tab'||event.key==='Escape')return;
+        event.preventDefault();event.stopPropagation();
+        const code=computerKeyCode(event);
+        if(!computerKeyLabel(code)||event.ctrlKey||event.metaKey||event.altKey){
+          $('computer-key-status').textContent='Use a letter, number, or punctuation key without Ctrl, Alt, or Command.';
+          return;
+        }
+        const old=pending.find(row=>row!==binding&&row.code===code);
+        const label=event.key.length===1?event.key.toUpperCase():computerKeyLabel(code);
+        if(old){old.code='';old.label='';}
+        Object.assign(binding,{code,label});
+        $('computer-key-status').textContent=old?label+' was reassigned to '+pitchName(binding.p)+'.':'';
+        draw();$('computer-key-'+i).focus({preventScroll:true});
+      };
+      $('computer-pitch-'+i).onchange=e=>{binding.p=Number(e.target.value);};
+      $('computer-remove-'+i).onclick=()=>{
+        pending.splice(i,1);draw();
+        ($('computer-key-'+i)||$('computer-key-add')).focus({preventScroll:true});
+      };
+    });
+  }
+  draw();
+  $('computer-key-add').onclick=()=>{
+    pending.push({code:'',label:'',p:60});draw();$('computer-key-'+(pending.length-1)).focus();
+  };
+  $('computer-key-reset').onclick=()=>{
+    pending=defaultComputerKeys();draw();$('computer-key-status').textContent='Default mappings restored. Save to apply them.';
+  };
+}
+
 const PIANO_FIRST=21, PIANO_LAST=108;
 let pianoExpanded=false,pianoWidth=0,pianoRenderedStaves=0,stepEntry=false,stepChord=null,composerTake=null;
 
@@ -3201,16 +3315,17 @@ function renderPiano(){
     else if(lower>0)lower--;
     rows=pianoRanges(pref.octave,capacity,upper,lower);
   }
-  const shortcutBase=(pref.octave+1)*12;
+  const shortcuts=new Map();
+  for(const binding of computerKeys)if(!shortcuts.has(binding.p))shortcuts.set(binding.p,binding.label);
   const rowsStyle='--white-key:'+keySize+'px;--piano-height:'+height+'px';
   board.setAttribute('style',rowsStyle);
   board.innerHTML=rows.map(({min,max,count,role})=>{
     const whites=[];let black='';
     for(let p=min;p<=max;p++){
-      const name=pitchName(p),shortcut=keyShortcuts[p-shortcutBase]||'';
-      const attrs=' type="button" data-pitch="'+p+'" aria-label="'+name+'" title="'+name+(shortcut?' · '+shortcut.toUpperCase():'')+'"';
+      const name=pitchName(p),shortcut=shortcuts.get(p)||'';
+      const attrs=' type="button" data-pitch="'+p+'" aria-label="'+name+'" title="'+name+(shortcut?' · '+escapeHTML(shortcut):'')+'"';
       const isNatural=PC.includes(p%12);
-      const label=p%12===0||p===min||p===max?name:pianoExpanded&&isNatural?pitchName(p,false,false):shortcut.toUpperCase();
+      const label=p%12===0||p===min||p===max?name:pianoExpanded&&isNatural?pitchName(p,false,false):shortcut;
       const face='<span class="'+(p%12===0||p===min||p===max?'octave-mark':'key-letter')+'">'+escapeHTML(label)+'</span>';
       if(isNatural)whites.push('<button class="key"'+attrs+'>'+face+'</button>');
       else black+='<button class="key black"'+attrs+' style="left:'+Math.min(whites.length*keySize,(count-.33)*keySize)+'px"></button>';
@@ -3271,6 +3386,7 @@ function syncComposerPiano(){
   }
   const showReview=compose&&!active&&!!review;
   for(const id of ['keys-keep','keys-discard','piano-keep','piano-discard','piano-take-settings'])$(id).hidden=!showReview;
+  $('piano-audition').hidden=!compose||active||!(review||saved);
   $('keys-replay').disabled=active;
   $('keys-section').disabled=active;
   const status=active?(composerTake.countIn?'Count-in':count?count+' notes':'Play the keys to begin'):
@@ -3278,6 +3394,7 @@ function syncComposerPiano(){
     pianoExpanded&&mode==='record'&&pianoTake?'Piano mic · '+(pianoTake.stage||focusRecordLabel()):'';
   $('keys-take-status').textContent=status;
   $('piano-entry-status').textContent=status||(stepEntry?'Release the keys to place the note or chord.':'');
+  playerStatus();
 }
 const timingAssistLabel=value=>TIMING_ASSIST.find(([v])=>v===value)?.[1]||'Off';
 const focusRecordLabel=()=>$('focus-record-label').textContent;
@@ -3470,6 +3587,7 @@ function attachPiano(){
   $('score-keys-open').onclick=()=>setPianoExpanded(true);
   $('keys-exit').onclick=()=>setPianoExpanded(false);
   $('keyboard-settings').onclick=()=>toggleKeySettings();
+  $('computer-keys').onclick=computerKeysDialog;
   $('piano-size').value=pref.pianoSize;
   $('piano-size').oninput=e=>{pref.pianoSize=Number(e.target.value);renderPiano();};
   $('piano-size').onchange=storeLocal;
@@ -3624,7 +3742,10 @@ function keepKeyboardDraft(){
   if(!count){
     keyboardDrafts.set(piece.id,draft);renderScore();syncComposerPiano();
     toast('No new notes fit. Change the section or timing assist, or discard the take.');
-  }else toast(count+' '+(count===1?'note added':'notes added')+' to the score. Original timing saved.');
+  }else{
+    setCursor(draft.start,pref.follow);
+    toast(count+' '+(count===1?'note added':'notes added')+' to the score. Press Play to hear the take.');
+  }
 }
 function discardKeyboardDraft(){
   if(composerTake)return;
@@ -3649,9 +3770,22 @@ function replayKeyboardSection(){
   sectionPlayback={start,end,notes:draft?.corrected||[],excluded:prior?new Set(prior.noteIds):null};
   startPlayback();
 }
+function playKeyboardTake(){
+  if(playing&&sectionPlayback?.take){stopPlayback(false);return;}
+  const draft=keyboardDrafts.get(piece.id), saved=acceptedKeyboardTake(currentKeyboardPassage().from);
+  const ids=new Set(saved?.noteIds||[]);
+  const notes=draft?.corrected??piece.notes.filter(n=>ids.has(n.id)&&n.s<piece.staves);
+  if(!notes.length){toast('There are no notes in this take to play.');return;}
+  const start=notes.reduce((t,n)=>Math.min(t,n.t),Infinity);
+  const end=notes.reduce((t,n)=>Math.max(t,n.t+n.d),start+1);
+  stopPlayback(false);setCursor(start,pref.follow);
+  sectionPlayback={start,end,notes,take:true};
+  startPlayback();
+}
 function attachKeyboardPassage(){
   $('keys-section').onclick=$('piano-take-settings').onclick=keyboardPassageDialog;
   $('keys-replay').onclick=replayKeyboardSection;
+  $('piano-audition').onclick=playKeyboardTake;
   $('keys-record').onclick=()=>mode==='record'?activateRecorderControl():composerTake?finishComposerTake():startComposerTake();
   for(const id of ['keys-keep','piano-keep'])$(id).onclick=keepKeyboardDraft;
   for(const id of ['keys-discard','piano-discard'])$(id).onclick=discardKeyboardDraft;
@@ -4026,7 +4160,7 @@ function renderInspector(){
         (pianoMessage&&!take?'<p class="hint record-message" role="status">'+escapeHTML(pianoMessage)+'</p>':'')+
         button('piano-mic-settings','Piano mic settings','button wide','sliders'):
         hint('Play the on-screen piano or use an input device. Live microphone input follows one pitch at a time.')+button('record-input','Connect input','button wide','plug'))+
-      (piece.raw?button('convert-take','Change this take’s notation','button wide','sliders'):'')+'</div>';
+      (piece.raw?button('play-recording','Play recording','button wide','play')+button('convert-take','Change this take’s notation','button wide','sliders'):'')+'</div>';
     $('record-source').disabled=taking;$('record-detail').disabled=taking;$('record-assist').disabled=taking;
     $('record-assist').onchange=e=>{pref.recordAssist=e.target.value;storeLocal();};
     $('take').disabled=phase==='stopping';
@@ -4034,7 +4168,13 @@ function renderInspector(){
     $('record-detail').onchange=e=>{localRecordDetail=e.target.value;storeLocal();};$('take').onclick=activateRecorderControl;
     if(piano){$('piano-mic-settings').disabled=taking;$('piano-mic-settings').onclick=pianoMicDialog;}
     else $('record-input').onclick=inputDialog;
-    if(piece.raw){$('convert-take').disabled=taking;$('convert-take').onclick=convertDialog;}
+    if(piece.raw){
+      $('play-recording').disabled=taking;
+      $('play-recording').onclick=()=>{
+        stopPlayback(false);setCursor(firstScoreNote(piece),pref.follow);startPlayback();
+      };
+      $('convert-take').disabled=taking;$('convert-take').onclick=convertDialog;
+    }
     if(phase==='capturing')renderPianoMeter(take);
   }else{
     const n=focusedNote(), d=n?writtenDuration(n.d):writtenDuration(inputDuration*(inputDot?1.5:1)), isDotted=d.dots>0;
@@ -4879,10 +5019,8 @@ function validImport(content){
       const controls=Array.isArray(src.raw.pedal)?src.raw.pedal.filter(e=>Number.isFinite(e?.on)&&e.on>=0&&Number.isInteger(e.channel)&&e.channel>=0&&e.channel<16&&Number.isInteger(e.value)&&e.value>=0&&e.value<=127):[];
       result.raw={version:1,bpm:src.raw.bpm,duration:src.raw.duration,events:src.raw.events,pedal:controls};
       if(TIMING_ASSIST.some(([v])=>v===src.raw.assist))result.raw.assist=src.raw.assist;
-      if(src.raw.source==='piano-mic'){
-        result.raw.source='piano-mic';
-        result.raw.notationStart=clamp(Number(src.raw.notationStart)||0,0,86400);
-      }
+      if(src.raw.source==='piano-mic')result.raw.source='piano-mic';
+      if(Number.isFinite(src.raw.notationStart))result.raw.notationStart=clamp(src.raw.notationStart,0,86400);
     }
   }
   return result;
@@ -5188,6 +5326,7 @@ function attachViews(){
 
 function attachStudio(){
   icons();
+  if(piece.raw)cursor=firstScoreNote(piece);
   attachViews();attachSheet();attachPiano();renderPiano();render();setMode('compose');
   if(pref.sheetOnly)$('score-scroll').focus({preventScroll:true});
   $('catalog').onclick=e=>{const song=e.target.closest('[data-song]');if(song)switchScore(song.dataset.song);};
@@ -5229,7 +5368,7 @@ function attachStudio(){
       if(pref.sheetOnly){e.preventDefault();leaveSheetView();return;}
       closeRadial();lastHit=null;setMoveNotes(false);if(linkFrom){clearLink();renderScore();}return;
     }
-    const editable=e.target.closest('input,select,textarea,[contenteditable]');
+    const editable=e.target.closest?.('input,select,textarea,[contenteditable]');
     if(e.ctrlKey||e.metaKey){
       const lower=e.key.toLowerCase();
       if(!editable&&!$('dialog').open&&(lower==='z'||lower==='y')){e.preventDefault();goHistory(lower==='y'||e.shiftKey?'redo':'undo');}
@@ -5237,7 +5376,13 @@ function attachStudio(){
       return;
     }
     if(editable||$('dialog').open||e.altKey)return;
-    if(e.code==='Space'&&!e.target.closest('button,a')&&!e.repeat){e.preventDefault();toggle();return;}
+    if(e.code==='Space'&&!e.target.closest?.('button,a')&&!e.repeat){e.preventDefault();toggle();return;}
+    const code=computerKeyCode(e), binding=computerKeys.find(item=>item.code===code);
+    if(binding){
+      e.preventDefault();
+      if(!e.repeat)liveOn(binding.p,86,'kb:'+code);
+      return;
+    }
     if(mode==='compose'&&/^[1-6]$/.test(e.key)&&!e.repeat){chooseDuration(Number(e.key)-1);return;}
     if(mode==='compose'&&selected&&!e.repeat){
       if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();deleteNote();return;}
@@ -5247,10 +5392,8 @@ function attachStudio(){
         updateNote({t,micro:0});setCursor(t);return;
       }
     }
-    const i=keyShortcuts.indexOf(e.key.toLowerCase());
-    if(i>=0&&!e.repeat){e.preventDefault();liveOn((pref.octave+1)*12+i,86,'kb:'+e.code);}
   });
-  document.addEventListener('keyup',e=>liveOff('kb:'+e.code));
+  document.addEventListener('keyup',e=>liveOff('kb:'+computerKeyCode(e)));
   window.addEventListener('blur',()=>{
     for(const key of heldVoices.keys())if(!key.startsWith('microphone')&&(key.startsWith('kb:')||key.startsWith('ptr')))liveOff(key);
   });
